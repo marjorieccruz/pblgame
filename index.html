@@ -3,874 +3,1147 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<meta name="theme-color" content="#0f0e17">
-<meta name="description" content="PBL Learning Cards — A collaborative card game for team learning">
-<link rel="manifest" href="manifest.json">
-<title>PBL Cards</title>
-<link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,wght@0,300;0,700;0,900;1,300&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet">
+<title>PBL Game — Start Your Journey</title>
+<link href="https://fonts.googleapis.com/css2?family=Space+Mono:wght@400;700&family=Syne:wght@400;600;700;800&display=swap" rel="stylesheet">
 <style>
   :root {
-    --bg: #0f0e17;
-    --surface: #1a1825;
-    --surface2: #231f35;
     --line1: #F37E4C;
-    --line1-light: #faa27a;
-    --line1-dim: rgba(243,126,76,0.15);
     --line2: #795CDC;
-    --line2-light: #9b82e8;
-    --line2-dim: rgba(121,92,220,0.15);
-    --line3: #4EA72E;
-    --line3-light: #76c952;
-    --line3-dim: rgba(78,167,46,0.15);
-    --text: #fffffe;
-    --text-muted: #a7a9be;
-    --text-dim: #6b6d8a;
-    --radius: 20px;
-    --card-w: 380px;
-    --card-h: 520px;
+    --line3: #3C7C54;
+    --green: #4EA72E;
+    --bg: #F5F0E8;
+    --dark: #1A1A2E;
+    --card-bg: #FFFFFF;
+    --station-size: 14px;
+    --track: 4px;
   }
 
   * { margin: 0; padding: 0; box-sizing: border-box; }
 
   body {
+    font-family: 'Syne', sans-serif;
     background: var(--bg);
-    color: var(--text);
-    font-family: 'DM Sans', sans-serif;
+    color: var(--dark);
     min-height: 100vh;
     overflow-x: hidden;
   }
 
-  /* Ambient background */
-  body::before {
-    content: '';
-    position: fixed;
-    inset: 0;
-    background:
-      radial-gradient(ellipse 60% 40% at 20% 20%, rgba(121,92,220,0.12) 0%, transparent 60%),
-      radial-gradient(ellipse 50% 50% at 80% 80%, rgba(78,167,46,0.08) 0%, transparent 60%),
-      radial-gradient(ellipse 40% 60% at 50% 50%, rgba(243,126,76,0.06) 0%, transparent 60%);
-    pointer-events: none;
-    z-index: 0;
-  }
+  /* ── SCREENS ── */
+  .screen { display: none; min-height: 100vh; }
+  .screen.active { display: flex; flex-direction: column; }
 
-  /* Noise texture */
-  body::after {
-    content: '';
-    position: fixed;
-    inset: 0;
-    background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)' opacity='0.04'/%3E%3C/svg%3E");
-    pointer-events: none;
-    z-index: 0;
-    opacity: 0.4;
-  }
-
-  /* ---- HEADER ---- */
-  header {
+  /* ── INTRO SCREEN ── */
+  #screen-intro {
+    align-items: center;
+    justify-content: center;
+    background: var(--dark);
     position: relative;
-    z-index: 10;
-    padding: 28px 40px 0;
+    overflow: hidden;
+  }
+
+  #screen-intro::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: 
+      radial-gradient(circle at 20% 50%, rgba(243,126,76,0.15) 0%, transparent 50%),
+      radial-gradient(circle at 80% 30%, rgba(121,92,220,0.15) 0%, transparent 50%),
+      radial-gradient(circle at 50% 80%, rgba(60,124,84,0.15) 0%, transparent 50%);
+  }
+
+  .intro-content {
+    text-align: center;
+    position: relative;
+    z-index: 1;
+    padding: 40px;
+  }
+
+  .intro-tag {
+    font-family: 'Space Mono', monospace;
+    font-size: 11px;
+    letter-spacing: 4px;
+    color: var(--green);
+    text-transform: uppercase;
+    margin-bottom: 20px;
+    opacity: 0;
+    animation: fadeUp 0.6s ease forwards 0.2s;
+  }
+
+  .intro-title {
+    font-size: clamp(56px, 10vw, 100px);
+    font-weight: 800;
+    color: #fff;
+    line-height: 0.9;
+    letter-spacing: -3px;
+    margin-bottom: 8px;
+    opacity: 0;
+    animation: fadeUp 0.6s ease forwards 0.4s;
+  }
+
+  .intro-title span {
+    display: block;
+    font-size: clamp(24px, 4vw, 40px);
+    font-weight: 400;
+    letter-spacing: 2px;
+    color: rgba(255,255,255,0.5);
+    margin-top: 10px;
+  }
+
+  .intro-subtitle {
+    font-family: 'Space Mono', monospace;
+    font-size: 13px;
+    color: rgba(255,255,255,0.4);
+    margin: 32px 0 48px;
+    line-height: 1.8;
+    opacity: 0;
+    animation: fadeUp 0.6s ease forwards 0.6s;
+  }
+
+  .line-pills {
+    display: flex;
+    gap: 12px;
+    justify-content: center;
+    margin-bottom: 48px;
+    opacity: 0;
+    animation: fadeUp 0.6s ease forwards 0.8s;
+  }
+
+  .pill {
+    padding: 6px 16px;
+    border-radius: 100px;
+    font-size: 11px;
+    font-weight: 700;
+    letter-spacing: 1px;
+    text-transform: uppercase;
+    color: white;
+  }
+  .pill-1 { background: var(--line1); }
+  .pill-2 { background: var(--line2); }
+  .pill-3 { background: var(--line3); }
+
+  .btn-start {
+    background: var(--green);
+    color: white;
+    border: none;
+    padding: 18px 52px;
+    font-family: 'Syne', sans-serif;
+    font-size: 16px;
+    font-weight: 700;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    border-radius: 4px;
+    cursor: pointer;
+    transition: all 0.2s;
+    opacity: 0;
+    animation: fadeUp 0.6s ease forwards 1s;
+    position: relative;
+    overflow: hidden;
+  }
+
+  .btn-start::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: rgba(255,255,255,0.1);
+    transform: translateX(-100%);
+    transition: transform 0.3s ease;
+  }
+
+  .btn-start:hover::after { transform: translateX(0); }
+  .btn-start:hover { transform: translateY(-2px); box-shadow: 0 8px 24px rgba(78,167,46,0.4); }
+
+  /* ── SETUP SCREEN ── */
+  #screen-setup {
+    align-items: center;
+    justify-content: center;
+    padding: 40px 20px;
+    background: var(--bg);
+  }
+
+  .setup-box {
+    background: white;
+    border-radius: 16px;
+    padding: 48px;
+    max-width: 540px;
+    width: 100%;
+    box-shadow: 0 4px 40px rgba(0,0,0,0.08);
+  }
+
+  .setup-box h2 {
+    font-size: 28px;
+    font-weight: 800;
+    margin-bottom: 8px;
+  }
+
+  .setup-box p {
+    font-family: 'Space Mono', monospace;
+    font-size: 12px;
+    color: rgba(0,0,0,0.4);
+    margin-bottom: 36px;
+  }
+
+  .team-input-group { margin-bottom: 20px; }
+
+  .team-input-group label {
+    display: block;
+    font-size: 12px;
+    font-weight: 700;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    margin-bottom: 8px;
+    color: rgba(0,0,0,0.5);
+  }
+
+  .team-input-group input {
+    width: 100%;
+    padding: 14px 16px;
+    border: 2px solid #E8E8E8;
+    border-radius: 8px;
+    font-family: 'Syne', sans-serif;
+    font-size: 16px;
+    font-weight: 600;
+    outline: none;
+    transition: border-color 0.2s;
+  }
+
+  .team-input-group input:focus { border-color: var(--green); }
+
+  #teams-container { margin-bottom: 28px; }
+
+  .btn-add-team {
+    background: none;
+    border: 2px dashed #ccc;
+    border-radius: 8px;
+    padding: 12px;
+    width: 100%;
+    font-family: 'Syne', sans-serif;
+    font-size: 14px;
+    color: #999;
+    cursor: pointer;
+    transition: all 0.2s;
+    margin-bottom: 28px;
+  }
+
+  .btn-add-team:hover { border-color: var(--green); color: var(--green); }
+
+  .btn-primary {
+    background: var(--dark);
+    color: white;
+    border: none;
+    padding: 16px 32px;
+    font-family: 'Syne', sans-serif;
+    font-size: 15px;
+    font-weight: 700;
+    letter-spacing: 1px;
+    border-radius: 8px;
+    cursor: pointer;
+    width: 100%;
+    transition: all 0.2s;
+  }
+
+  .btn-primary:hover { background: var(--green); transform: translateY(-1px); }
+
+  /* ── GAME SCREEN ── */
+  #screen-game {
+    flex-direction: row;
+    height: 100vh;
+    overflow: hidden;
+  }
+
+  /* SIDEBAR */
+  .sidebar {
+    width: 220px;
+    min-width: 220px;
+    background: var(--dark);
+    color: white;
+    padding: 24px 16px;
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    overflow-y: auto;
+  }
+
+  .sidebar-logo {
+    font-size: 18px;
+    font-weight: 800;
+    letter-spacing: -1px;
+    margin-bottom: 16px;
+    padding-bottom: 16px;
+    border-bottom: 1px solid rgba(255,255,255,0.1);
+  }
+
+  .sidebar-logo span {
+    display: block;
+    font-family: 'Space Mono', monospace;
+    font-size: 9px;
+    font-weight: 400;
+    letter-spacing: 3px;
+    color: rgba(255,255,255,0.4);
+    margin-top: 2px;
+  }
+
+  .sidebar-section {
+    font-family: 'Space Mono', monospace;
+    font-size: 9px;
+    letter-spacing: 3px;
+    text-transform: uppercase;
+    color: rgba(255,255,255,0.3);
+    padding: 12px 8px 4px;
+  }
+
+  .team-chip {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 10px 12px;
+    border-radius: 8px;
+    cursor: pointer;
+    transition: background 0.15s;
+    position: relative;
+  }
+
+  .team-chip:hover { background: rgba(255,255,255,0.05); }
+  .team-chip.active { background: rgba(255,255,255,0.1); }
+
+  .team-dot {
+    width: 10px; height: 10px;
+    border-radius: 50%;
+    flex-shrink: 0;
+  }
+
+  .team-chip-name {
+    font-size: 13px;
+    font-weight: 600;
+    flex: 1;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+
+  .team-chip-pos {
+    font-family: 'Space Mono', monospace;
+    font-size: 10px;
+    color: rgba(255,255,255,0.4);
+  }
+
+  .sidebar-turn-btn {
+    margin-top: auto;
+    background: var(--green);
+    color: white;
+    border: none;
+    padding: 14px;
+    border-radius: 8px;
+    font-family: 'Syne', sans-serif;
+    font-size: 13px;
+    font-weight: 700;
+    letter-spacing: 1px;
+    cursor: pointer;
+    transition: all 0.2s;
+    text-align: center;
+  }
+
+  .sidebar-turn-btn:hover { filter: brightness(1.1); }
+
+  /* MAIN BOARD */
+  .board-area {
+    flex: 1;
+    overflow: hidden;
+    position: relative;
+    background: var(--bg);
+  }
+
+  .board-header {
+    position: absolute;
+    top: 0; left: 0; right: 0;
+    padding: 16px 24px;
     display: flex;
     align-items: center;
     justify-content: space-between;
+    z-index: 10;
+    background: linear-gradient(to bottom, var(--bg) 70%, transparent);
   }
 
-  .logo {
-    font-family: 'Fraunces', serif;
-    font-size: 1.4rem;
-    font-weight: 700;
-    letter-spacing: -0.02em;
+  .current-turn {
     display: flex;
     align-items: center;
     gap: 10px;
   }
 
-  .logo-dot {
+  .turn-label {
+    font-family: 'Space Mono', monospace;
+    font-size: 10px;
+    letter-spacing: 2px;
+    color: rgba(0,0,0,0.4);
+    text-transform: uppercase;
+  }
+
+  .turn-name {
+    font-size: 16px;
+    font-weight: 800;
+  }
+
+  .turn-dot {
+    width: 12px; height: 12px;
+    border-radius: 50%;
+  }
+
+  .line-legend {
+    display: flex;
+    gap: 16px;
+  }
+
+  .legend-item {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    font-family: 'Space Mono', monospace;
+    font-size: 10px;
+    font-weight: 700;
+    letter-spacing: 1px;
+  }
+
+  .legend-dot {
     width: 10px; height: 10px;
     border-radius: 50%;
-    background: var(--line3);
-    box-shadow: 0 0 12px var(--line3);
   }
 
-  .header-counter {
-    font-size: 0.8rem;
-    color: var(--text-dim);
-    letter-spacing: 0.08em;
-    text-transform: uppercase;
+  /* SVG BOARD */
+  #board-svg {
+    width: 100%;
+    height: 100%;
   }
 
-  /* ---- LINE SELECTOR ---- */
-  .line-selector {
-    position: relative;
-    z-index: 10;
-    display: flex;
-    gap: 12px;
-    padding: 28px 40px 0;
-    overflow-x: auto;
-    scrollbar-width: none;
-  }
-  .line-selector::-webkit-scrollbar { display: none; }
+  /* STATION styles in SVG are inline */
 
-  .line-btn {
-    flex-shrink: 0;
-    padding: 10px 20px;
-    border-radius: 100px;
-    border: 1.5px solid transparent;
-    background: var(--surface);
-    color: var(--text-muted);
-    font-family: 'DM Sans', sans-serif;
-    font-size: 0.78rem;
-    font-weight: 500;
-    letter-spacing: 0.05em;
-    text-transform: uppercase;
-    cursor: pointer;
-    transition: all 0.3s ease;
-    position: relative;
-    overflow: hidden;
-  }
-
-  .line-btn::before {
-    content: '';
-    position: absolute;
+  /* ── CARD MODAL ── */
+  .modal-overlay {
+    position: fixed;
     inset: 0;
-    opacity: 0;
-    transition: opacity 0.3s;
-  }
-
-  .line-btn[data-line="1"] { --c: var(--line1); }
-  .line-btn[data-line="2"] { --c: var(--line2); }
-  .line-btn[data-line="3"] { --c: var(--line3); }
-  .line-btn[data-line="all"] { --c: #a7a9be; }
-
-  .line-btn.active {
-    border-color: var(--c);
-    color: var(--c);
-    background: color-mix(in srgb, var(--c) 12%, var(--surface));
-    box-shadow: 0 0 20px color-mix(in srgb, var(--c) 25%, transparent);
-  }
-
-  .line-btn:hover:not(.active) {
-    border-color: color-mix(in srgb, var(--c) 40%, transparent);
-    color: var(--text);
-  }
-
-  /* ---- MAIN STAGE ---- */
-  .stage {
-    position: relative;
-    z-index: 10;
-    display: flex;
-    flex-direction: column;
+    background: rgba(0,0,0,0.7);
+    backdrop-filter: blur(4px);
+    z-index: 100;
+    display: none;
     align-items: center;
     justify-content: center;
-    padding: 40px 20px 20px;
-    min-height: calc(100vh - 160px);
+    padding: 20px;
   }
 
-  /* ---- CARD STACK ---- */
-  .card-stack {
-    position: relative;
-    width: var(--card-w);
-    height: var(--card-h);
-    perspective: 1000px;
-    margin-bottom: 32px;
-  }
+  .modal-overlay.open { display: flex; }
 
-  /* Ghost cards behind */
-  .card-stack::before,
-  .card-stack::after {
-    content: '';
-    position: absolute;
-    inset: 0;
-    border-radius: var(--radius);
-    background: var(--surface2);
-    border: 1.5px solid color-mix(in srgb, var(--active-color, #fff) 15%, transparent);
-    transition: all 0.5s ease;
-  }
-  .card-stack::before {
-    transform: rotate(4deg) translateY(8px);
-    opacity: 0.5;
-  }
-  .card-stack::after {
-    transform: rotate(-2.5deg) translateY(4px);
-    opacity: 0.35;
-  }
-
-  /* ---- CARD ---- */
   .card {
-    position: absolute;
-    inset: 0;
-    border-radius: var(--radius);
-    cursor: pointer;
-    transform-style: preserve-3d;
-    transition: transform 0.7s cubic-bezier(0.34, 1.56, 0.64, 1);
-    user-select: none;
-  }
-
-  .card.flipped { transform: rotateY(180deg); }
-
-  .card.deal-in {
-    animation: dealIn 0.5s cubic-bezier(0.34, 1.3, 0.64, 1) forwards;
-  }
-
-  .card.deal-out {
-    animation: dealOut 0.35s ease-in forwards;
-  }
-
-  @keyframes dealIn {
-    from { transform: translateX(120%) rotate(15deg) scale(0.8); opacity: 0; }
-    to   { transform: translateX(0) rotate(0) scale(1); opacity: 1; }
-  }
-
-  @keyframes dealOut {
-    from { transform: translateX(0) rotate(0) scale(1); opacity: 1; }
-    to   { transform: translateX(-120%) rotate(-10deg) scale(0.8); opacity: 0; }
-  }
-
-  .card-face {
-    position: absolute;
-    inset: 0;
-    border-radius: var(--radius);
-    backface-visibility: hidden;
-    -webkit-backface-visibility: hidden;
-    display: flex;
-    flex-direction: column;
+    background: white;
+    border-radius: 20px;
+    max-width: 500px;
+    width: 100%;
     overflow: hidden;
-    border: 1.5px solid color-mix(in srgb, var(--active-color, white) 20%, transparent);
+    box-shadow: 0 32px 80px rgba(0,0,0,0.3);
+    animation: cardIn 0.4s cubic-bezier(0.34, 1.56, 0.64, 1) forwards;
   }
 
-  .card-front {
-    background: var(--surface);
-  }
-
-  .card-back {
-    background: var(--surface2);
-    transform: rotateY(180deg);
-  }
-
-  /* Card top bar */
-  .card-line-bar {
-    height: 6px;
-    background: var(--active-color, var(--line1));
-    box-shadow: 0 2px 20px color-mix(in srgb, var(--active-color, var(--line1)) 60%, transparent);
-    flex-shrink: 0;
+  @keyframes cardIn {
+    from { transform: scale(0.85) translateY(20px); opacity: 0; }
+    to { transform: scale(1) translateY(0); opacity: 1; }
   }
 
   .card-header {
-    padding: 22px 28px 16px;
+    padding: 24px 28px 20px;
     display: flex;
     align-items: center;
     justify-content: space-between;
-    flex-shrink: 0;
   }
 
-  .card-line-label {
-    font-size: 0.65rem;
-    font-weight: 500;
-    letter-spacing: 0.12em;
+  .card-line-tag {
+    font-family: 'Space Mono', monospace;
+    font-size: 10px;
+    letter-spacing: 3px;
     text-transform: uppercase;
-    color: var(--active-color, var(--line1));
-    background: color-mix(in srgb, var(--active-color, var(--line1)) 15%, transparent);
-    padding: 4px 10px;
+    font-weight: 700;
+    color: white;
+    padding: 4px 12px;
     border-radius: 100px;
   }
 
-  .card-number {
-    font-size: 0.7rem;
-    color: var(--text-dim);
-    font-weight: 300;
+  .card-station-label {
+    font-family: 'Space Mono', monospace;
+    font-size: 11px;
+    color: rgba(0,0,0,0.35);
+    letter-spacing: 1px;
   }
 
   .card-body {
-    flex: 1;
-    padding: 8px 28px 24px;
-    display: flex;
-    flex-direction: column;
-    justify-content: center;
-  }
-
-  .card-question-label {
-    font-size: 0.6rem;
-    letter-spacing: 0.15em;
-    text-transform: uppercase;
-    color: var(--text-dim);
-    margin-bottom: 16px;
-    font-weight: 500;
+    padding: 0 28px 28px;
   }
 
   .card-question {
-    font-family: 'Fraunces', serif;
-    font-size: 1.18rem;
-    font-weight: 300;
-    line-height: 1.55;
-    color: var(--text);
-    font-style: italic;
-  }
-
-  .card-tap-hint {
-    padding: 0 28px 24px;
-    font-size: 0.68rem;
-    color: var(--text-dim);
-    text-align: center;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    gap: 6px;
-    flex-shrink: 0;
-  }
-
-  .tap-icon {
-    width: 18px; height: 18px;
-    border: 1.5px solid var(--text-dim);
-    border-radius: 50%;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    font-size: 9px;
-  }
-
-  /* Back face */
-  .card-back .card-header {
-    padding-bottom: 12px;
-  }
-
-  .card-back-section {
-    padding: 0 28px 16px;
-    flex-shrink: 0;
-  }
-
-  .back-label {
-    font-size: 0.6rem;
-    letter-spacing: 0.15em;
-    text-transform: uppercase;
-    color: var(--text-dim);
-    margin-bottom: 10px;
-    font-weight: 500;
-  }
-
-  .back-outcome {
-    font-size: 0.88rem;
-    line-height: 1.55;
-    color: var(--text-muted);
-  }
-
-  .concept-pill {
-    display: inline-block;
-    padding: 6px 14px;
-    border-radius: 100px;
-    font-size: 0.72rem;
-    font-weight: 500;
-    background: color-mix(in srgb, var(--active-color, var(--line1)) 18%, transparent);
-    color: var(--active-color, var(--line1));
-    border: 1px solid color-mix(in srgb, var(--active-color, var(--line1)) 30%, transparent);
-    letter-spacing: 0.02em;
+    font-size: 22px;
+    font-weight: 700;
+    line-height: 1.35;
+    margin-bottom: 20px;
+    color: var(--dark);
   }
 
   .card-divider {
     height: 1px;
-    background: color-mix(in srgb, var(--text-dim) 20%, transparent);
-    margin: 0 28px 16px;
-    flex-shrink: 0;
+    background: #F0F0F0;
+    margin-bottom: 20px;
   }
 
-  /* ---- CONTROLS ---- */
-  .controls {
+  .card-concept-label {
+    font-family: 'Space Mono', monospace;
+    font-size: 9px;
+    letter-spacing: 3px;
+    text-transform: uppercase;
+    color: rgba(0,0,0,0.35);
+    margin-bottom: 6px;
+  }
+
+  .card-concept {
+    font-size: 14px;
+    font-weight: 600;
+    padding: 10px 14px;
+    border-radius: 8px;
+    display: inline-block;
+    margin-bottom: 20px;
+  }
+
+  .card-goal-label {
+    font-family: 'Space Mono', monospace;
+    font-size: 9px;
+    letter-spacing: 3px;
+    text-transform: uppercase;
+    color: rgba(0,0,0,0.35);
+    margin-bottom: 6px;
+  }
+
+  .card-goal {
+    font-size: 13px;
+    line-height: 1.6;
+    color: rgba(0,0,0,0.6);
+    margin-bottom: 28px;
+  }
+
+  .card-actions {
     display: flex;
-    align-items: center;
-    gap: 16px;
+    gap: 10px;
   }
 
-  .btn-nav {
-    width: 52px; height: 52px;
-    border-radius: 50%;
-    border: 1.5px solid var(--surface2);
-    background: var(--surface);
-    color: var(--text-muted);
-    font-size: 1.1rem;
+  .btn-close-card {
+    flex: 1;
+    padding: 14px;
+    border: 2px solid #E8E8E8;
+    background: none;
+    border-radius: 10px;
+    font-family: 'Syne', sans-serif;
+    font-size: 13px;
+    font-weight: 700;
     cursor: pointer;
-    display: flex;
-    align-items: center;
-    justify-content: center;
     transition: all 0.2s;
   }
 
-  .btn-nav:hover {
-    border-color: var(--text-muted);
-    color: var(--text);
-    transform: scale(1.05);
+  .btn-close-card:hover { border-color: #ccc; }
+
+  .btn-done-card {
+    flex: 2;
+    padding: 14px;
+    border: none;
+    border-radius: 10px;
+    font-family: 'Syne', sans-serif;
+    font-size: 13px;
+    font-weight: 700;
+    color: white;
+    cursor: pointer;
+    transition: all 0.2s;
   }
 
-  .btn-nav:disabled {
-    opacity: 0.3;
-    cursor: not-allowed;
-    transform: none;
-  }
+  .btn-done-card:hover { filter: brightness(1.1); transform: translateY(-1px); }
 
-  .btn-shuffle {
+  /* ── TOAST ── */
+  .toast {
+    position: fixed;
+    bottom: 32px;
+    left: 50%;
+    transform: translateX(-50%) translateY(80px);
+    background: var(--dark);
+    color: white;
     padding: 14px 28px;
     border-radius: 100px;
-    border: 1.5px solid color-mix(in srgb, var(--active-color, white) 30%, transparent);
-    background: color-mix(in srgb, var(--active-color, white) 10%, transparent);
-    color: var(--active-color, white);
-    font-family: 'DM Sans', sans-serif;
-    font-size: 0.8rem;
-    font-weight: 500;
-    letter-spacing: 0.05em;
-    text-transform: uppercase;
+    font-size: 13px;
+    font-weight: 600;
+    z-index: 200;
+    transition: transform 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
+    white-space: nowrap;
+  }
+
+  .toast.show { transform: translateX(-50%) translateY(0); }
+
+  /* ── WINNER SCREEN ── */
+  #screen-winner {
+    align-items: center;
+    justify-content: center;
+    background: var(--dark);
+    text-align: center;
+    padding: 40px;
+  }
+
+  .winner-emoji { font-size: 80px; margin-bottom: 24px; animation: bounce 1s ease infinite alternate; }
+
+  @keyframes bounce {
+    from { transform: translateY(0); }
+    to { transform: translateY(-12px); }
+  }
+
+  .winner-title {
+    font-size: clamp(40px, 8vw, 72px);
+    font-weight: 800;
+    color: white;
+    letter-spacing: -2px;
+    margin-bottom: 8px;
+  }
+
+  .winner-name {
+    font-size: clamp(24px, 5vw, 48px);
+    font-weight: 800;
+    margin-bottom: 32px;
+  }
+
+  .btn-restart {
+    background: var(--green);
+    color: white;
+    border: none;
+    padding: 16px 40px;
+    border-radius: 8px;
+    font-family: 'Syne', sans-serif;
+    font-size: 15px;
+    font-weight: 700;
     cursor: pointer;
+    letter-spacing: 1px;
     transition: all 0.2s;
   }
 
-  .btn-shuffle:hover {
-    background: color-mix(in srgb, var(--active-color, white) 20%, transparent);
-    transform: scale(1.03);
-    box-shadow: 0 0 20px color-mix(in srgb, var(--active-color, white) 20%, transparent);
+  .btn-restart:hover { filter: brightness(1.1); transform: translateY(-2px); }
+
+  @keyframes fadeUp {
+    from { opacity: 0; transform: translateY(16px); }
+    to { opacity: 1; transform: translateY(0); }
   }
 
-  /* ---- PROGRESS ---- */
-  .progress-wrap {
-    margin-top: 24px;
-    display: flex;
-    align-items: center;
-    gap: 12px;
-  }
-
-  .progress-bar {
-    width: 200px;
-    height: 3px;
-    background: var(--surface2);
-    border-radius: 100px;
-    overflow: hidden;
-  }
-
-  .progress-fill {
-    height: 100%;
-    background: var(--active-color, var(--line1));
-    border-radius: 100px;
-    transition: width 0.4s ease;
-    box-shadow: 0 0 8px color-mix(in srgb, var(--active-color, var(--line1)) 60%, transparent);
-  }
-
-  .progress-text {
-    font-size: 0.72rem;
-    color: var(--text-dim);
-    min-width: 50px;
-    text-align: right;
-  }
-
-  /* ---- EMPTY STATE ---- */
-  .empty-state {
-    display: none;
-    flex-direction: column;
-    align-items: center;
-    gap: 16px;
-    text-align: center;
-  }
-
-  .empty-state.visible { display: flex; }
-  .card-stack.hidden { display: none; }
-
-  .empty-icon {
-    font-size: 3rem;
-    opacity: 0.3;
-  }
-
-  .empty-title {
-    font-family: 'Fraunces', serif;
-    font-size: 1.4rem;
-    font-weight: 300;
-    font-style: italic;
-    color: var(--text-muted);
-  }
-
-  /* ---- COMPLETED STATE ---- */
-  .completed-overlay {
-    display: none;
-    position: absolute;
-    inset: 0;
-    border-radius: var(--radius);
-    background: color-mix(in srgb, var(--bg) 85%, transparent);
-    backdrop-filter: blur(8px);
-    flex-direction: column;
-    align-items: center;
-    justify-content: center;
-    gap: 12px;
-    z-index: 20;
-    text-align: center;
-    padding: 28px;
-  }
-
-  .completed-overlay.show { display: flex; }
-
-  .completed-icon {
-    font-size: 2.5rem;
-    animation: pulse 1.5s ease-in-out infinite;
-  }
-
-  @keyframes pulse {
-    0%, 100% { transform: scale(1); }
-    50% { transform: scale(1.1); }
-  }
-
-  .completed-title {
-    font-family: 'Fraunces', serif;
-    font-size: 1.4rem;
-    font-weight: 700;
-    color: var(--active-color, var(--line3));
-  }
-
-  .completed-sub {
-    font-size: 0.82rem;
-    color: var(--text-muted);
-  }
-
-  /* ---- MOBILE ---- */
-  @media (max-width: 500px) {
-    :root {
-      --card-w: calc(100vw - 40px);
-      --card-h: 480px;
-    }
-
-    header { padding: 20px 20px 0; }
-    .line-selector { padding: 20px 20px 0; }
-    .stage { padding: 24px 20px 20px; }
+  /* Responsive */
+  @media (max-width: 768px) {
+    #screen-game { flex-direction: column; }
+    .sidebar { width: 100%; min-width: unset; flex-direction: row; flex-wrap: wrap; height: auto; overflow-x: auto; padding: 12px; }
+    .sidebar-logo { display: none; }
+    .sidebar-section { display: none; }
+    .sidebar-turn-btn { margin-top: 0; }
+    .board-area { flex: 1; }
   }
 </style>
 </head>
 <body>
 
-<header>
-  <div class="logo">
-    <div class="logo-dot"></div>
-    PBL Cards
+<!-- INTRO -->
+<div id="screen-intro" class="screen active">
+  <div class="intro-content">
+    <div class="intro-tag">IT:U Interdisciplinary University</div>
+    <div class="intro-title">PBL<span>GAME</span></div>
+    <div class="intro-subtitle">
+      A learning journey for teams<br>
+      Choose your line · Draw a card · Start a conversation
+    </div>
+    <div class="line-pills">
+      <div class="pill pill-1">LINE 1 · Know Each Other</div>
+      <div class="pill pill-2">LINE 2 · Individual Learning</div>
+      <div class="pill pill-3">LINE 3 · Team Learning</div>
+    </div>
+    <button class="btn-start" onclick="showScreen('setup')">Start Your Journey →</button>
   </div>
-  <div class="header-counter" id="headerCounter">32 cards</div>
-</header>
-
-<div class="line-selector">
-  <button class="line-btn active" data-line="all" onclick="setLine('all')">All Lines</button>
-  <button class="line-btn" data-line="1" onclick="setLine('1')">🟠 Line 1 — Get to Know</button>
-  <button class="line-btn" data-line="2" onclick="setLine('2')">🟣 Line 2 — Individual Learning</button>
-  <button class="line-btn" data-line="3" onclick="setLine('3')">🟢 Line 3 — Team Learning</button>
 </div>
 
-<div class="stage">
-
-  <div class="card-stack" id="cardStack">
-    <div class="card" id="mainCard" onclick="flipCard()">
-
-      <!-- FRONT -->
-      <div class="card-face card-front">
-        <div class="card-line-bar" id="cardBar"></div>
-        <div class="card-header">
-          <span class="card-line-label" id="cardLineLabel">Line 1</span>
-          <span class="card-number" id="cardNumberFront">01 / 32</span>
-        </div>
-        <div class="card-body">
-          <div class="card-question-label">Question</div>
-          <div class="card-question" id="cardQuestion">Loading...</div>
-        </div>
-        <div class="card-tap-hint">
-          <div class="tap-icon">↻</div>
-          Tap to reveal outcome
-        </div>
-      </div>
-
-      <!-- BACK -->
-      <div class="card-face card-back">
-        <div class="card-line-bar" id="cardBarBack"></div>
-        <div class="card-header">
-          <span class="card-line-label" id="cardLineLabelBack">Line 1</span>
-          <span class="card-number" id="cardNumberBack">01 / 32</span>
-        </div>
-        <div class="card-back-section">
-          <div class="back-label">Outcome / Goal</div>
-          <div class="back-outcome" id="cardOutcome">—</div>
-        </div>
-        <div class="card-divider"></div>
-        <div class="card-back-section">
-          <div class="back-label">Key Concept</div>
-          <span class="concept-pill" id="cardConcept">—</span>
-        </div>
-        <div class="card-divider"></div>
-        <div class="card-back-section" style="flex:1; display:flex; align-items:flex-end; justify-content:center; padding-bottom: 24px;">
-          <div style="font-size:0.68rem; color: var(--text-dim); text-align:center;">Tap again to flip back · Use arrows to navigate</div>
-        </div>
-      </div>
-
-    </div>
-
-    <!-- Completed overlay -->
-    <div class="completed-overlay" id="completedOverlay">
-      <div class="completed-icon">✦</div>
-      <div class="completed-title">All cards done!</div>
-      <div class="completed-sub">Great discussion session.<br>Shuffle to play again.</div>
-    </div>
+<!-- SETUP -->
+<div id="screen-setup" class="screen">
+  <div class="setup-box">
+    <h2>Set Up Teams</h2>
+    <p>Add the teams playing today</p>
+    <div id="teams-container"></div>
+    <button class="btn-add-team" onclick="addTeamInput()">+ Add another team</button>
+    <button class="btn-primary" onclick="startGame()">Launch Game →</button>
   </div>
-
-  <!-- Empty state (no cards) -->
-  <div class="empty-state" id="emptyState">
-    <div class="empty-icon">◇</div>
-    <div class="empty-title">No cards in this line yet</div>
-  </div>
-
-  <!-- Controls -->
-  <div class="controls">
-    <button class="btn-nav" id="btnPrev" onclick="prevCard()" title="Previous">←</button>
-    <button class="btn-shuffle" onclick="shuffle()" id="btnShuffle">⇄ Shuffle</button>
-    <button class="btn-nav" id="btnNext" onclick="nextCard()" title="Next">→</button>
-  </div>
-
-  <!-- Progress -->
-  <div class="progress-wrap">
-    <div class="progress-bar">
-      <div class="progress-fill" id="progressFill" style="width:3%"></div>
-    </div>
-    <div class="progress-text" id="progressText">1 / 32</div>
-  </div>
-
 </div>
+
+<!-- GAME -->
+<div id="screen-game" class="screen">
+  <div class="sidebar">
+    <div class="sidebar-logo">PBL Game<span>Start Your Journey</span></div>
+    <div class="sidebar-section">Teams</div>
+    <div id="teams-list"></div>
+    <button class="sidebar-turn-btn" onclick="nextTurn()">End Turn →</button>
+  </div>
+  <div class="board-area">
+    <div class="board-header">
+      <div class="current-turn">
+        <div class="turn-dot" id="turn-dot"></div>
+        <div>
+          <div class="turn-label">Current Turn</div>
+          <div class="turn-name" id="turn-name">—</div>
+        </div>
+      </div>
+      <div class="line-legend">
+        <div class="legend-item"><div class="legend-dot" style="background:var(--line1)"></div>LINE 1</div>
+        <div class="legend-item"><div class="legend-dot" style="background:var(--line2)"></div>LINE 2</div>
+        <div class="legend-item"><div class="legend-dot" style="background:var(--line3)"></div>LINE 3</div>
+      </div>
+    </div>
+    <svg id="board-svg" viewBox="0 0 800 600" preserveAspectRatio="xMidYMid meet"></svg>
+  </div>
+</div>
+
+<!-- WINNER -->
+<div id="screen-winner" class="screen">
+  <div class="winner-emoji">🎉</div>
+  <div class="winner-title">Journey Complete!</div>
+  <div class="winner-name" id="winner-name" style="color: var(--green)"></div>
+  <p style="color:rgba(255,255,255,0.4); font-family:'Space Mono',monospace; font-size:12px; margin-bottom:40px">has visited all stations</p>
+  <button class="btn-restart" onclick="showScreen('intro')">Play Again</button>
+</div>
+
+<!-- CARD MODAL -->
+<div class="modal-overlay" id="card-modal">
+  <div class="card">
+    <div class="card-header">
+      <div class="card-line-tag" id="modal-line-tag"></div>
+      <div class="card-station-label" id="modal-station-label"></div>
+    </div>
+    <div class="card-body">
+      <div class="card-question" id="modal-question"></div>
+      <div class="card-divider"></div>
+      <div class="card-concept-label">Key Concept</div>
+      <div class="card-concept" id="modal-concept"></div>
+      <div class="card-goal-label">Goal</div>
+      <div class="card-goal" id="modal-goal"></div>
+      <div class="card-actions">
+        <button class="btn-close-card" onclick="closeCard()">Skip</button>
+        <button class="btn-done-card" id="modal-done-btn" onclick="completeStation()">Answered! ✓</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- TOAST -->
+<div class="toast" id="toast"></div>
 
 <script>
-const DATA = {
-  "LINE 1": {
-    "title": "GET TO KNOW EACH OTHER",
-    "color": "#F37E4C",
-    "cards": [
-      { "question": "Introduce yourself (starting card with intro)", "outcome": "Build connections — helps participants get to know each other", "concept": "Psychological Safety & Belonging" },
-      { "question": "What is your research or academic background?", "outcome": "Understand backgrounds — provides insight into each person's expertise", "concept": "Interdisciplinary Awareness & Identity" },
-      { "question": "What motivated you to enter your discipline? Was it planned or a happy accident?", "outcome": "Explore motivations — shares personal stories behind career choices", "concept": "Interdisciplinary Awareness & Identity" },
-      { "question": "What's one thing about your field that you wish more people understood?", "outcome": "Promote awareness — highlights key insights from different fields", "concept": "Interdisciplinary Awareness & Identity" },
-      { "question": "If you had to explain your field of study/work to a child in one sentence, how would you do it?", "outcome": "Simplify complexity — encourages clear and accessible communication", "concept": "Interdisciplinary Awareness & Identity" },
-      { "question": "What's a skill or knowledge area from another discipline you wish you had or admire?", "outcome": "Foster interdisciplinary appreciation — recognizes valuable skills from other disciplines", "concept": "Interdisciplinary Awareness & Identity" },
-      { "question": "What's the most exciting project or research you've worked on that involved different disciplines?", "outcome": "Encourage collaboration — shares experiences of working across disciplines", "concept": "Authentic & Experiential Learning" },
-      { "question": "What motivated you to change your discipline and join IT:U? Was it planned or a happy accident?", "outcome": "Motivation for IT:U, working interdisciplinarily", "concept": "Psychological Safety & Belonging" },
-      { "question": "What's a skill or knowledge area from your discipline that you are proud of and bring to the table?", "outcome": "Interdisciplinary appreciation — recognizing benefits due to complementarity", "concept": "Interdisciplinary Awareness & Identity" }
-    ]
-  },
-  "LINE 2": {
-    "title": "INDIVIDUAL LEARNING",
-    "color": "#795CDC",
-    "cards": [
-      { "question": "What strategies do you use to stay motivated when learning something new?", "outcome": "Understand motivation — identifies what drives individuals to stay engaged in the learning process", "concept": "Self-Regulated Learning (SRL)" },
-      { "question": "How do you plan and manage your time when preparing for a big project or deadline?", "outcome": "Explore time management — reveals strategies for organizing work efficiently and meeting goals", "concept": "Self-Regulated Learning (SRL)" },
-      { "question": "When you get stuck on a difficult problem or concept, what do you usually do?", "outcome": "Assess problem-solving approaches — uncovers strategies for overcoming learning obstacles", "concept": "Self-Regulated Learning (SRL)" },
-      { "question": "Can you think of a time when you adjusted your study methods to improve your learning? What was the trigger and what did you change?", "outcome": "Encourage reflection on learning adaptation — highlights self-awareness and the ability to refine learning techniques", "concept": "Metacognition & Reflection" },
-      { "question": "How do you adapt your learning approach when faced with a subject or skill that doesn't come naturally to you?", "outcome": "Analyze learning flexibility — examines how individuals adjust their approach to challenging topics", "concept": "Self-Regulated Learning (SRL)" },
-      { "question": "How do you usually learn from teammates who have a different approach or background than yours?", "outcome": "Bridge individual learning to team learning — connects personal learning style to collaborative PBL context", "concept": "Co-Regulation & Peer Learning" },
-      { "question": "When managing multiple projects or learning goals, how do you prioritize tasks while ensuring long-term retention and deep understanding?", "outcome": "Evaluate prioritization and deep learning strategies — explores how individuals balance workload while ensuring comprehension", "concept": "Self-Regulated Learning (SRL)" },
-      { "question": "How do you integrate feedback — whether from peers, mentors, or self-reflection — into your learning process?", "outcome": "Highlight the role of feedback in growth — demonstrates how constructive input influences learning and improvement", "concept": "Co-Regulation & Peer Learning" },
-      { "question": "How do you usually coordinate team and individual goals and approaches? What are your strategies to coordinate vested interests in teams?", "outcome": "Bridge individual learning to team learning — connects personal (learning) agendas to collaborative PBL context", "concept": "Socially Shared Regulated Learning (SSRL)" },
-      { "question": "What are your expectations for working interdisciplinarily? What strategies do you apply in such contexts?", "outcome": "Interdisciplinary collaboration — experiences and strategies", "concept": "Socially Shared Regulated Learning (SSRL)" },
-      { "question": "What are your expectations for working, learning and innovating in teams? How do you deal with team learning, project coordination and communication?", "outcome": "Collaboration — experiences and strategies; socially shared regulated learning", "concept": "Socially Shared Regulated Learning (SSRL)" }
-    ]
-  },
-  "LINE 3": {
-    "title": "TEAM LEARNING",
-    "color": "#4EA72E",
-    "cards": [
-      { "question": "Have you ever worked on a project that required knowledge and skills from multiple disciplines? How did combining different perspectives impact your learning?", "outcome": "Encourage interdisciplinary thinking — explores how integrating diverse knowledge areas enhances learning and problem-solving", "concept": "Authentic & Experiential Learning" },
-      { "question": "How do you feel about using a digital portfolio to showcase your learning and projects? What benefits or challenges do you see?", "outcome": "Assess reflection and presentation of learning — examines attitudes toward documenting and sharing learning experiences", "concept": "Metacognition & Reflection" },
-      { "question": "PBL often involves collaboration with industry and academia. What kinds of real-world projects would you be most excited to work on, and why?", "outcome": "Connect learning to real-world applications — identifies interests and motivations for engaging in practical, impactful work", "concept": "Authentic & Experiential Learning" },
-      { "question": "Would you be open to sharing your work in a team, and collaborating with a broader learning community? What would make you more willing to participate?", "outcome": "Explore openness to knowledge sharing and collaboration — investigates willingness to engage in broader learning networks", "concept": "Psychological Safety & Belonging" },
-      { "question": "Reflecting on a past project, what was the most valuable lesson you learned — not just academically, but in terms of teamwork, communication, or adaptability?", "outcome": "Highlight personal and professional growth — encourages reflection on key skills gained beyond academic knowledge", "concept": "Transversal Skills Development" },
-      { "question": "What do you expect from a team PBL coach (or facilitator) during a project? How would their support of the team learning process ideally look?", "outcome": "Align coaching expectations — surfaces participants' mental models of coaching and prepares them for the coach/facilitator role definition", "concept": "Team Regulation & Collaboration Contract" },
-      { "question": "Think of a time you worked in a team where things didn't go as planned. What ground rules or agreements could have helped?", "outcome": "Prepare for the Collaboration Contract — connects real experience to the need for explicit team agreements and process tools", "concept": "Team Regulation & Collaboration Contract" },
-      { "question": "When working in teams, how do you handle situations where someone is not contributing or there is a destructive conflict?", "outcome": "Explore team regulation and conflict resolution — addresses teamwork dynamics and the coach's role in supporting (not solving) team challenges", "concept": "Team Regulation & Collaboration Contract" },
-      { "question": "What tools have you used to manage projects or track team progress (e.g., Gantt charts, Kanban boards, shared docs)? What worked and what didn't?", "outcome": "Map prior experience with PM tools — identifies baseline knowledge and prepares for introduction of Lucidchart, Gantt charts, and portfolio tools", "concept": "Project Management Literacy" },
-      { "question": "Which transversal skills (e.g., teamwork, communication, adaptability, critical thinking) do you find most challenging to develop? Why?", "outcome": "Identify transversal skill development priorities — helps coaches focus on specific skills and informs indirect grading via student development", "concept": "Transversal Skills Development" },
-      { "question": "How do you think regular check-ins or structured meetings with a coach could support your team's learning process?", "outcome": "Introduce coaching process/structure — opens discussion about recurring meeting structure and the value of process coaching for team learning", "concept": "Co-Regulation & Peer Learning" },
-      { "question": "Have you ever participated in project-based learning or worked in an industry project? What are your experiences and lessons learned, or what are your expectations?", "outcome": "PBL approach — experiences and strategies; active learning in teams", "concept": "Authentic & Experiential Learning" }
-    ]
-  }
+// ── DATA ──────────────────────────────────────────────────────────────────
+const LINES = {
+  1: { name: 'Get to Know Each Other', color: '#F37E4C', label: 'LINE 1' },
+  2: { name: 'Individual Learning',    color: '#795CDC', label: 'LINE 2' },
+  3: { name: 'Team Learning',          color: '#3C7C54', label: 'LINE 3' }
 };
 
-// State
-let activeLine = 'all';
-let deck = [];
-let currentIndex = 0;
-let isFlipped = false;
-let isAnimating = false;
+const CARDS = {
+  1: [
+    { q: 'Introduce yourself to the group.', concept: 'Psychological Safety & Belonging', goal: 'Build connections — helps participants get to know each other' },
+    { q: 'What is your research or academic background?', concept: 'Interdisciplinary Awareness & Identity', goal: 'Understand backgrounds — provides insight into each person\'s expertise' },
+    { q: 'What motivated you to enter your discipline? Was it planned or a happy accident?', concept: 'Interdisciplinary Awareness & Identity', goal: 'Explore motivations — shares personal stories behind career choices' },
+    { q: 'What\'s one thing about your field that you wish more people understood?', concept: 'Interdisciplinary Awareness & Identity', goal: 'Promote awareness — highlights key insights from different fields' },
+    { q: 'If you had to explain your field to a child in one sentence, how would you do it?', concept: 'Interdisciplinary Awareness & Identity', goal: 'Simplify complexity — encourages clear and accessible communication' },
+    { q: 'What\'s a skill or knowledge area from another discipline you wish you had or admire?', concept: 'Interdisciplinary Awareness & Identity', goal: 'Foster interdisciplinary appreciation — recognizes valuable skills from other disciplines' },
+    { q: 'What\'s the most exciting interdisciplinary project you\'ve worked on?', concept: 'Authentic & Experiential Learning', goal: 'Encourage collaboration — shares experiences of working across disciplines' },
+    { q: 'What motivated you to change your discipline and join IT:U?', concept: 'Psychological Safety & Belonging', goal: 'Motivation for IT:U, working interdisciplinarily' },
+    { q: 'What\'s a skill from your discipline that you are proud of and bring to the table?', concept: 'Interdisciplinary Awareness & Identity', goal: 'Interdisciplinary appreciation — recognizing benefits due to complementarity' },
+  ],
+  2: [
+    { q: 'What strategies do you use to stay motivated when learning something new?', concept: 'Self-Regulated Learning (SRL)', goal: 'Understand motivation — identifies what drives individuals to stay engaged' },
+    { q: 'How do you plan and manage your time when preparing for a big project or deadline?', concept: 'Self-Regulated Learning (SRL)', goal: 'Explore time management — reveals strategies for organizing work efficiently' },
+    { q: 'When you get stuck on a difficult problem or concept, what do you usually do?', concept: 'Self-Regulated Learning (SRL)', goal: 'Assess problem-solving approaches — uncovers strategies for overcoming learning obstacles' },
+    { q: 'Can you think of a time when you adjusted your study methods to improve your learning? What was the trigger?', concept: 'Metacognition & Reflection', goal: 'Encourage reflection on learning adaptation — highlights self-awareness and ability to refine learning techniques' },
+    { q: 'How do you adapt your learning approach when faced with a subject that doesn\'t come naturally?', concept: 'Self-Regulated Learning (SRL)', goal: 'Analyze learning flexibility — examines how individuals adjust their approach to challenging topics' },
+    { q: 'How do you usually learn from teammates who have a different approach or background?', concept: 'Co-Regulation & Peer Learning', goal: 'Bridge individual learning to team learning — connects personal learning style to collaborative PBL context' },
+    { q: 'When managing multiple projects or learning goals, how do you prioritize tasks while ensuring deep understanding?', concept: 'Self-Regulated Learning (SRL)', goal: 'Evaluate prioritization and deep learning strategies' },
+    { q: 'How do you integrate feedback — from peers, mentors, or self-reflection — into your learning process?', concept: 'Co-Regulation & Peer Learning', goal: 'Highlight the role of feedback in growth — demonstrates how input influences learning and improvement' },
+    { q: 'How do you usually coordinate team and individual goals? What are your strategies to coordinate vested interests?', concept: 'Socially Shared Regulated Learning (SSRL)', goal: 'Bridge individual learning to team learning — connects personal agendas to collaborative PBL context' },
+    { q: 'What are your expectations for working interdisciplinarily? What strategies do you apply?', concept: 'Socially Shared Regulated Learning (SSRL)', goal: 'Interdisciplinary collaboration — experiences and strategies' },
+    { q: 'What are your expectations for working, learning and innovating in teams?', concept: 'Socially Shared Regulated Learning (SSRL)', goal: 'Collaboration — experiences and strategies; socially shared regulated learning' },
+  ],
+  3: [
+    { q: 'Have you ever worked on a project that required knowledge from multiple disciplines? How did combining perspectives impact your learning?', concept: 'Authentic & Experiential Learning', goal: 'Encourage interdisciplinary thinking — explores how integrating diverse knowledge enhances learning' },
+    { q: 'How do you feel about using a digital portfolio to showcase your learning and projects?', concept: 'Metacognition & Reflection', goal: 'Assess reflection and presentation of learning — examines attitudes toward documenting experiences' },
+    { q: 'PBL involves collaboration with industry and academia. What kinds of real-world projects would you be most excited to work on?', concept: 'Authentic & Experiential Learning', goal: 'Connect learning to real-world applications — identifies interests and motivations' },
+    { q: 'Would you be open to sharing your work in a team and collaborating with a broader learning community? What would make you more willing?', concept: 'Psychological Safety & Belonging', goal: 'Explore openness to knowledge sharing — investigates willingness to engage in broader learning networks' },
+    { q: 'Reflecting on a past project, what was the most valuable lesson — not just academically, but in terms of teamwork, communication, or adaptability?', concept: 'Transversal Skills Development', goal: 'Highlight personal and professional growth — encourages reflection on key skills gained beyond academics' },
+    { q: 'What do you expect from a team PBL coach during a project? How would their support ideally look?', concept: 'Team Regulation & Collaboration Contract', goal: 'Align coaching expectations — surfaces mental models of coaching and prepares for the coach/facilitator role' },
+    { q: 'Think of a time you worked in a team where things didn\'t go as planned. What ground rules or agreements could have helped?', concept: 'Team Regulation & Collaboration Contract', goal: 'Prepare for the Collaboration Contract — connects real experience to the need for explicit team agreements' },
+    { q: 'When working in teams, how do you handle situations where someone is not contributing or there is unconstructive conflict?', concept: 'Team Regulation & Collaboration Contract', goal: 'Explore team regulation and conflict resolution — addresses teamwork dynamics' },
+    { q: 'What tools have you used to manage projects or track team progress (e.g., Gantt charts, Kanban boards)?', concept: 'Project Management Literacy', goal: 'Map prior experience with PM tools — identifies baseline knowledge and prepares for Lucidchart and Gantt tools' },
+    { q: 'Which transversal skills (e.g., teamwork, communication, adaptability, critical thinking) do you find most challenging to develop?', concept: 'Transversal Skills Development', goal: 'Identify transversal skill development priorities — helps coaches focus on specific skills' },
+    { q: 'How do you think regular check-ins or structured meetings with a coach could support your team\'s learning process?', concept: 'Co-Regulation & Peer Learning', goal: 'Introduce coaching process/structure — opens discussion about recurring meeting structure' },
+    { q: 'Have you ever participated in project-based learning or worked on an industry project? What are your experiences and lessons learned?', concept: 'Authentic & Experiential Learning', goal: 'PBL approach — experiences and strategies; active learning in teams' },
+  ]
+};
 
-const lineColors = { '1': '#F37E4C', '2': '#795CDC', '3': '#4EA72E', 'all': '#a7a9be' };
-const lineNames = { '1': 'Line 1', '2': 'Line 2', '3': 'Line 3' };
-const lineTitles = { '1': 'GET TO KNOW EACH OTHER', '2': 'INDIVIDUAL LEARNING', '3': 'TEAM LEARNING' };
+// ── BOARD LAYOUT (metro-style) ────────────────────────────────────────────
+// Stations per line with SVG positions
+const STATIONS = {
+  1: [
+    { id:'1-1', x:80,  y:480, label:'S1' },
+    { id:'1-2', x:160, y:400, label:'S2' },
+    { id:'1-3', x:160, y:300, label:'S3' },
+    { id:'1-4', x:160, y:200, label:'S4' },
+    { id:'1-5', x:240, y:130, label:'S5' },
+    { id:'1-6', x:340, y:130, label:'S6' },
+    { id:'1-7', x:440, y:130, label:'S7' },
+    { id:'1-8', x:540, y:200, label:'S8' },
+    { id:'1-9', x:540, y:300, label:'END', isEnd: true },
+  ],
+  2: [
+    { id:'2-1', x:80,  y:300, label:'S1' },
+    { id:'2-2', x:160, y:300, label:'S2', isJunction: true },
+    { id:'2-3', x:240, y:300, label:'S3' },
+    { id:'2-4', x:340, y:300, label:'S4' },
+    { id:'2-5', x:440, y:300, label:'S5' },
+    { id:'2-6', x:540, y:300, label:'S6', isJunction: true },
+    { id:'2-7', x:640, y:300, label:'S7' },
+    { id:'2-8', x:720, y:380, label:'S8' },
+    { id:'2-9', x:720, y:460, label:'S9' },
+    { id:'2-10',x:640, y:480, label:'S10'},
+    { id:'2-11',x:540, y:480, label:'END', isEnd: true },
+  ],
+  3: [
+    { id:'3-1', x:80,  y:120, label:'S1' },
+    { id:'3-2', x:160, y:120, label:'S2' },
+    { id:'3-3', x:240, y:120, label:'S3', isJunction: true },
+    { id:'3-4', x:340, y:120, label:'S4' },
+    { id:'3-5', x:440, y:120, label:'S5' },
+    { id:'3-6', x:540, y:120, label:'S6' },
+    { id:'3-7', x:640, y:120, label:'S7' },
+    { id:'3-8', x:720, y:200, label:'S8' },
+    { id:'3-9', x:720, y:300, label:'S9', isJunction: true },
+    { id:'3-10',x:720, y:380, label:'S10', isJunction: true },
+    { id:'3-11',x:640, y:460, label:'S11'},
+    { id:'3-12',x:540, y:480, label:'END', isEnd: true },
+  ]
+};
 
-function buildDeck(line) {
-  if (line === 'all') {
-    return [
-      ...DATA['LINE 1'].cards.map(c => ({ ...c, line: '1', color: DATA['LINE 1'].color })),
-      ...DATA['LINE 2'].cards.map(c => ({ ...c, line: '2', color: DATA['LINE 2'].color })),
-      ...DATA['LINE 3'].cards.map(c => ({ ...c, line: '3', color: DATA['LINE 3'].color })),
-    ];
-  }
-  const key = 'LINE ' + line;
-  return DATA[key].cards.map(c => ({ ...c, line, color: DATA[key].color }));
+// ── STATE ─────────────────────────────────────────────────────────────────
+let teams = [];
+let currentTeamIdx = 0;
+let activeStation = null;
+let activeCard = null;
+
+const TEAM_COLORS = ['#E74C3C','#3498DB','#9B59B6','#E67E22','#1ABC9C','#F39C12'];
+
+// ── INIT ──────────────────────────────────────────────────────────────────
+function showScreen(name) {
+  document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+  document.getElementById('screen-' + name).classList.add('active');
+  if (name === 'setup') initSetup();
+  if (name === 'game')  initBoard();
 }
 
-function setLine(line) {
-  activeLine = line;
-  document.querySelectorAll('.line-btn').forEach(b => b.classList.remove('active'));
-  document.querySelector(`[data-line="${line}"]`).classList.add('active');
-  deck = buildDeck(line);
-  currentIndex = 0;
-  isFlipped = false;
-  document.getElementById('completedOverlay').classList.remove('show');
-  renderCard(true);
-  updateUI();
+function initSetup() {
+  const c = document.getElementById('teams-container');
+  c.innerHTML = '';
+  addTeamInput('Team Alpha');
+  addTeamInput('Team Beta');
 }
 
-function renderCard(animate = false) {
-  const card = document.getElementById('mainCard');
-  const stack = document.getElementById('cardStack');
-  const empty = document.getElementById('emptyState');
+function addTeamInput(defaultVal = '') {
+  const c = document.getElementById('teams-container');
+  const idx = c.children.length;
+  const div = document.createElement('div');
+  div.className = 'team-input-group';
+  div.innerHTML = `
+    <label>Team ${idx + 1}</label>
+    <input type="text" placeholder="Enter team name" value="${defaultVal}">
+  `;
+  c.appendChild(div);
+}
 
-  if (deck.length === 0) {
-    stack.classList.add('hidden');
-    empty.classList.add('visible');
-    return;
-  }
+function startGame() {
+  const inputs = document.querySelectorAll('#teams-container input');
+  teams = [];
+  inputs.forEach((inp, i) => {
+    const name = inp.value.trim() || `Team ${i+1}`;
+    teams.push({
+      name,
+      color: TEAM_COLORS[i % TEAM_COLORS.length],
+      positions: { 1: 0, 2: 0, 3: 0 },
+      completed: { 1: [], 2: [], 3: [] },
+      usedCards: { 1: [], 2: [], 3: [] },
+      totalAnswered: 0,
+      chosenLine: null
+    });
+  });
+  currentTeamIdx = 0;
+  showScreen('game');
+}
 
-  stack.classList.remove('hidden');
-  empty.classList.remove('visible');
+// ── BOARD RENDERING ───────────────────────────────────────────────────────
+function initBoard() {
+  renderSidebar();
+  renderBoard();
+  updateTurnDisplay();
+}
 
-  const c = deck[currentIndex];
-  const color = c.color;
+function renderSidebar() {
+  const list = document.getElementById('teams-list');
+  list.innerHTML = '';
+  teams.forEach((team, i) => {
+    const div = document.createElement('div');
+    div.className = 'team-chip' + (i === currentTeamIdx ? ' active' : '');
+    div.id = `team-chip-${i}`;
+    const total = Object.values(team.completed).reduce((a, b) => a + b.length, 0);
+    const max = Object.values(CARDS).reduce((a, b) => a + b.length, 0);
+    div.innerHTML = `
+      <div class="team-dot" style="background:${team.color}"></div>
+      <div class="team-chip-name">${team.name}</div>
+      <div class="team-chip-pos">${total}/${max}</div>
+    `;
+    list.appendChild(div);
+  });
+}
 
-  // Set CSS variable for active color
-  document.documentElement.style.setProperty('--active-color', color);
-  stack.style.setProperty('--active-color', color);
+function renderBoard() {
+  const svg = document.getElementById('board-svg');
+  svg.innerHTML = '';
 
-  // Front
-  document.getElementById('cardBar').style.background = color;
-  document.getElementById('cardBar').style.boxShadow = `0 2px 20px ${color}99`;
-  document.getElementById('cardLineLabel').textContent = `Line ${c.line}`;
-  document.getElementById('cardLineLabel').style.color = color;
-  document.getElementById('cardLineLabel').style.background = `${color}25`;
-  document.getElementById('cardNumberFront').textContent = `${String(currentIndex+1).padStart(2,'0')} / ${String(deck.length).padStart(2,'0')}`;
-  document.getElementById('cardQuestion').textContent = c.question;
+  const defs = document.createElementNS('http://www.w3.org/2000/svg','defs');
+  // subtle grid background
+  defs.innerHTML = `
+    <pattern id="grid" width="40" height="40" patternUnits="userSpaceOnUse">
+      <path d="M 40 0 L 0 0 0 40" fill="none" stroke="rgba(0,0,0,0.04)" stroke-width="1"/>
+    </pattern>
+    <filter id="glow">
+      <feGaussianBlur stdDeviation="3" result="blur"/>
+      <feMerge><feMergeNode in="blur"/><feMergeNode in="SourceGraphic"/></feMerge>
+    </filter>
+  `;
+  svg.appendChild(defs);
 
-  // Back
-  document.getElementById('cardBarBack').style.background = color;
-  document.getElementById('cardBarBack').style.boxShadow = `0 2px 20px ${color}99`;
-  document.getElementById('cardLineLabelBack').textContent = `Line ${c.line}`;
-  document.getElementById('cardLineLabelBack').style.color = color;
-  document.getElementById('cardLineLabelBack').style.background = `${color}25`;
-  document.getElementById('cardNumberBack').textContent = `${String(currentIndex+1).padStart(2,'0')} / ${String(deck.length).padStart(2,'0')}`;
-  document.getElementById('cardOutcome').textContent = c.outcome;
-  document.getElementById('cardConcept').textContent = c.concept;
-  document.getElementById('cardConcept').style.color = color;
-  document.getElementById('cardConcept').style.background = `${color}20`;
-  document.getElementById('cardConcept').style.borderColor = `${color}40`;
+  // Background
+  const bg = document.createElementNS('http://www.w3.org/2000/svg','rect');
+  bg.setAttribute('width','800'); bg.setAttribute('height','600');
+  bg.setAttribute('fill','url(#grid)');
+  svg.appendChild(bg);
 
-  // Border color
-  document.querySelectorAll('.card-face').forEach(f => {
-    f.style.borderColor = `${color}30`;
+  // Title
+  const title = document.createElementNS('http://www.w3.org/2000/svg','text');
+  title.setAttribute('x','400'); title.setAttribute('y','555');
+  title.setAttribute('text-anchor','middle');
+  title.setAttribute('font-family','Syne, sans-serif');
+  title.setAttribute('font-size','11');
+  title.setAttribute('font-weight','700');
+  title.setAttribute('letter-spacing','4');
+  title.setAttribute('fill','rgba(0,0,0,0.15)');
+  title.textContent = 'PBL GAME · START YOUR JOURNEY';
+  svg.appendChild(title);
+
+  // Draw each line's track
+  [1, 2, 3].forEach(line => {
+    const stns = STATIONS[line];
+    const color = LINES[line].color;
+
+    // Track path
+    const pts = stns.map(s => `${s.x},${s.y}`).join(' ');
+    const path = document.createElementNS('http://www.w3.org/2000/svg','polyline');
+    path.setAttribute('points', pts);
+    path.setAttribute('fill','none');
+    path.setAttribute('stroke', color);
+    path.setAttribute('stroke-width','4');
+    path.setAttribute('stroke-linecap','round');
+    path.setAttribute('stroke-linejoin','round');
+    path.setAttribute('opacity','0.7');
+    svg.appendChild(path);
   });
 
-  // Stack ghost cards
-  document.querySelector('.card-stack::before');
+  // Draw stations
+  [1, 2, 3].forEach(line => {
+    const stns = STATIONS[line];
+    const color = LINES[line].color;
+    const cards = CARDS[line];
 
-  // Flip state
-  if (isFlipped) {
-    card.classList.add('flipped');
-  } else {
-    card.classList.remove('flipped');
-  }
+    stns.forEach((stn, idx) => {
+      const cardIdx = idx; // each station maps to a card
+      const card = cards[cardIdx] || cards[cards.length - 1];
 
-  if (animate) {
-    card.classList.remove('deal-out');
-    card.classList.add('deal-in');
-    setTimeout(() => card.classList.remove('deal-in'), 500);
-  }
-}
+      // Check if any team has completed this station
+      const completedByAny = teams.some(t => t.completed[line].includes(stn.id));
+      const completedByCurrent = teams[currentTeamIdx]?.completed[line].includes(stn.id);
 
-function updateUI() {
-  const total = deck.length;
-  const idx = currentIndex;
+      // Station group
+      const g = document.createElementNS('http://www.w3.org/2000/svg','g');
+      g.setAttribute('cursor', completedByCurrent ? 'default' : 'pointer');
+      if (!completedByCurrent) {
+        g.addEventListener('click', () => openCard(line, stn, card));
+      }
 
-  document.getElementById('progressFill').style.width = total ? `${((idx + 1) / total) * 100}%` : '0%';
-  document.getElementById('progressText').textContent = total ? `${idx + 1} / ${total}` : '0 / 0';
-  document.getElementById('headerCounter').textContent = `${total} cards`;
+      // Outer ring
+      const outer = document.createElementNS('http://www.w3.org/2000/svg','circle');
+      outer.setAttribute('cx', stn.x); outer.setAttribute('cy', stn.y);
+      outer.setAttribute('r', stn.isEnd ? '14' : '10');
+      outer.setAttribute('fill', completedByCurrent ? color : 'white');
+      outer.setAttribute('stroke', color);
+      outer.setAttribute('stroke-width', stn.isEnd ? '3' : '2.5');
+      outer.setAttribute('opacity', completedByCurrent ? '1' : '0.9');
+      g.appendChild(outer);
 
-  document.getElementById('btnPrev').disabled = idx === 0;
-  document.getElementById('btnNext').disabled = idx === total - 1;
+      // Inner dot
+      if (!completedByCurrent) {
+        const inner = document.createElementNS('http://www.w3.org/2000/svg','circle');
+        inner.setAttribute('cx', stn.x); inner.setAttribute('cy', stn.y);
+        inner.setAttribute('r', '4');
+        inner.setAttribute('fill', color);
+        g.appendChild(inner);
+      } else {
+        // Checkmark
+        const check = document.createElementNS('http://www.w3.org/2000/svg','text');
+        check.setAttribute('x', stn.x); check.setAttribute('y', stn.y + 5);
+        check.setAttribute('text-anchor','middle');
+        check.setAttribute('font-size','12');
+        check.setAttribute('fill','white');
+        check.textContent = '✓';
+        g.appendChild(check);
+      }
 
-  // Shuffle button color
-  const color = activeLine !== 'all' ? lineColors[activeLine] : '#a7a9be';
-  const shuffleBtn = document.getElementById('btnShuffle');
-  shuffleBtn.style.borderColor = `${color}50`;
-  shuffleBtn.style.background = `${color}15`;
-  shuffleBtn.style.color = color;
-}
+      // Team markers (small dots above station showing which teams visited)
+      const visitingTeams = teams.filter(t => t.completed[line].includes(stn.id));
+      visitingTeams.forEach((t, ti) => {
+        const dot = document.createElementNS('http://www.w3.org/2000/svg','circle');
+        dot.setAttribute('cx', stn.x - 8 + ti * 9);
+        dot.setAttribute('cy', stn.y - 18);
+        dot.setAttribute('r', '4');
+        dot.setAttribute('fill', t.color);
+        dot.setAttribute('stroke','white');
+        dot.setAttribute('stroke-width','1.5');
+        g.appendChild(dot);
+      });
 
-function flipCard() {
-  if (isAnimating) return;
-  isFlipped = !isFlipped;
-  const card = document.getElementById('mainCard');
-  if (isFlipped) {
-    card.classList.add('flipped');
-  } else {
-    card.classList.remove('flipped');
-  }
-}
+      // END label
+      if (stn.isEnd) {
+        const endLabel = document.createElementNS('http://www.w3.org/2000/svg','text');
+        endLabel.setAttribute('x', stn.x + 20); endLabel.setAttribute('y', stn.y + 4);
+        endLabel.setAttribute('font-family','Space Mono, monospace');
+        endLabel.setAttribute('font-size','9');
+        endLabel.setAttribute('font-weight','700');
+        endLabel.setAttribute('letter-spacing','2');
+        endLabel.setAttribute('fill', color);
+        endLabel.textContent = 'END';
+        g.appendChild(endLabel);
+      }
 
-function nextCard() {
-  if (isAnimating || currentIndex >= deck.length - 1) return;
-  animateTransition(() => {
-    currentIndex++;
-    isFlipped = false;
-    renderCard(true);
-    updateUI();
-    if (currentIndex === deck.length - 1) {
-      setTimeout(() => document.getElementById('completedOverlay').classList.add('show'), 800);
-    }
+      // Hover pulse (only for uncompleted)
+      if (!completedByCurrent) {
+        const pulse = document.createElementNS('http://www.w3.org/2000/svg','circle');
+        pulse.setAttribute('cx', stn.x); pulse.setAttribute('cy', stn.y);
+        pulse.setAttribute('r', '16');
+        pulse.setAttribute('fill', color);
+        pulse.setAttribute('opacity','0');
+        pulse.setAttribute('class','station-pulse');
+        g.setAttribute('data-pulse', '');
+        g.addEventListener('mouseenter', () => { pulse.setAttribute('opacity','0.15'); });
+        g.addEventListener('mouseleave', () => { pulse.setAttribute('opacity','0'); });
+        g.insertBefore(pulse, g.firstChild);
+      }
+
+      svg.appendChild(g);
+    });
+  });
+
+  // LINE labels on the left
+  [1,2,3].forEach(line => {
+    const firstStn = STATIONS[line][0];
+    const color = LINES[line].color;
+    const label = document.createElementNS('http://www.w3.org/2000/svg','text');
+    label.setAttribute('x', firstStn.x - 40);
+    label.setAttribute('y', firstStn.y + 4);
+    label.setAttribute('text-anchor','middle');
+    label.setAttribute('font-family','Space Mono, monospace');
+    label.setAttribute('font-size','9');
+    label.setAttribute('font-weight','700');
+    label.setAttribute('letter-spacing','1');
+    label.setAttribute('fill', color);
+    label.textContent = `L${line}`;
+    svg.appendChild(label);
   });
 }
 
-function prevCard() {
-  if (isAnimating || currentIndex <= 0) return;
-  currentIndex--;
-  isFlipped = false;
-  document.getElementById('completedOverlay').classList.remove('show');
-  renderCard(true);
-  updateUI();
+// ── CARD LOGIC ────────────────────────────────────────────────────────────
+function openCard(line, station, card) {
+  activeStation = { line, station };
+  activeCard = card;
+
+  const color = LINES[line].color;
+
+  document.getElementById('modal-line-tag').textContent = LINES[line].label;
+  document.getElementById('modal-line-tag').style.background = color;
+  document.getElementById('modal-station-label').textContent = `Station ${station.label}`;
+  document.getElementById('modal-question').textContent = card.q;
+  document.getElementById('modal-concept').textContent = card.concept;
+  document.getElementById('modal-concept').style.background = color + '18';
+  document.getElementById('modal-concept').style.color = color;
+  document.getElementById('modal-goal').textContent = card.goal;
+  document.getElementById('modal-done-btn').style.background = color;
+
+  document.getElementById('card-modal').classList.add('open');
 }
 
-function animateTransition(cb) {
-  isAnimating = true;
-  const card = document.getElementById('mainCard');
-  card.classList.add('deal-out');
-  setTimeout(() => {
-    card.classList.remove('deal-out');
-    cb();
-    isAnimating = false;
-  }, 350);
+function closeCard() {
+  document.getElementById('card-modal').classList.remove('open');
+  activeStation = null;
+  activeCard = null;
 }
 
-function shuffle() {
-  document.getElementById('completedOverlay').classList.remove('show');
-  // Fisher-Yates
-  for (let i = deck.length - 1; i > 0; i--) {
-    const j = Math.floor(Math.random() * (i + 1));
-    [deck[i], deck[j]] = [deck[j], deck[i]];
+function completeStation() {
+  if (!activeStation) return;
+  const { line, station } = activeStation;
+  const team = teams[currentTeamIdx];
+
+  if (!team.completed[line].includes(station.id)) {
+    team.completed[line].push(station.id);
+    team.totalAnswered++;
   }
-  currentIndex = 0;
-  isFlipped = false;
-  renderCard(true);
-  updateUI();
+
+  closeCard();
+  renderBoard();
+  renderSidebar();
+  showToast(`✓ ${team.name} answered a card!`);
+
+  // Check win condition (all stations on at least one line completed)
+  const allStationsCount = Object.values(STATIONS).reduce((a,b) => a + b.length, 0);
+  const teamTotal = Object.values(team.completed).reduce((a,b) => a + b.length, 0);
+  if (teamTotal >= allStationsCount) {
+    setTimeout(() => {
+      document.getElementById('winner-name').textContent = team.name;
+      document.getElementById('winner-name').style.color = team.color;
+      showScreen('winner');
+    }, 800);
+  }
 }
 
-// Keyboard nav
-document.addEventListener('keydown', e => {
-  if (e.key === 'ArrowRight' || e.key === 'ArrowDown') nextCard();
-  if (e.key === 'ArrowLeft' || e.key === 'ArrowUp') prevCard();
-  if (e.key === ' ' || e.key === 'Enter') { e.preventDefault(); flipCard(); }
+function nextTurn() {
+  currentTeamIdx = (currentTeamIdx + 1) % teams.length;
+  updateTurnDisplay();
+  renderSidebar();
+  renderBoard();
+  showToast(`Now it's ${teams[currentTeamIdx].name}'s turn`);
+}
+
+function updateTurnDisplay() {
+  const team = teams[currentTeamIdx];
+  if (!team) return;
+  document.getElementById('turn-name').textContent = team.name;
+  document.getElementById('turn-dot').style.background = team.color;
+}
+
+function showToast(msg) {
+  const t = document.getElementById('toast');
+  t.textContent = msg;
+  t.classList.add('show');
+  setTimeout(() => t.classList.remove('show'), 2500);
+}
+
+// ── BOOT ──────────────────────────────────────────────────────────────────
+document.addEventListener('DOMContentLoaded', () => {
+  showScreen('intro');
 });
-
-// Init
-deck = buildDeck('all');
-renderCard(true);
-updateUI();
 </script>
-
 </body>
 </html>
