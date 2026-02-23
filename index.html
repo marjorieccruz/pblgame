@@ -132,6 +132,22 @@ body{font-family:'Syne',sans-serif;background:var(--bg);color:var(--dark);min-he
 .toast{position:fixed;bottom:28px;left:50%;transform:translateX(-50%) translateY(70px);background:var(--dark);color:white;padding:13px 28px;border-radius:100px;font-size:13px;font-weight:600;z-index:500;transition:transform .3s cubic-bezier(.34,1.56,.64,1);white-space:nowrap;pointer-events:none;}
 .toast.show{transform:translateX(-50%) translateY(0);}
 @keyframes fadeUp{from{opacity:0;transform:translateY(16px)}to{opacity:1;transform:translateY(0)}}
+/* HOVER TOOLTIP */
+.stn-tooltip{
+  position:fixed;z-index:150;pointer-events:none;
+  background:var(--dark);color:white;
+  border-radius:12px;padding:12px 16px;
+  max-width:260px;min-width:160px;
+  box-shadow:0 8px 32px rgba(0,0,0,.28);
+  transition:opacity .15s ease, transform .15s ease;
+  opacity:0;transform:translateY(6px);
+}
+.stn-tooltip.visible{opacity:1;transform:translateY(0);}
+.stn-tooltip-line{font-family:'Space Mono',monospace;font-size:8px;letter-spacing:3px;text-transform:uppercase;margin-bottom:6px;opacity:.6;}
+.stn-tooltip-q{font-size:12px;font-weight:600;line-height:1.5;}
+.stn-tooltip-hint{font-family:'Space Mono',monospace;font-size:9px;color:rgba(255,255,255,.35);margin-top:8px;}
+.stn-tooltip-done{font-size:11px;color:rgba(255,255,255,.45);font-style:italic;}
+
 </style>
 </head>
 <body>
@@ -254,6 +270,8 @@ body{font-family:'Syne',sans-serif;background:var(--bg);color:var(--dark);min-he
 </div>
 
 <div class="toast" id="toast"></div>
+<div class="stn-tooltip" id="stn-tooltip"><div class="stn-tooltip-line" id="stn-tooltip-line"></div><div class="stn-tooltip-q" id="stn-tooltip-q"></div><div class="stn-tooltip-hint" id="stn-tooltip-hint"></div></div>
+
 
 <script>
 const LINE_META={
@@ -468,10 +486,23 @@ function renderBoard(){
         pulse.setAttribute('cx',stn.x); pulse.setAttribute('cy',stn.y);
         pulse.setAttribute('r','20'); pulse.setAttribute('fill',meta.color);
         pulse.setAttribute('opacity','0');
-        g.addEventListener('mouseenter',()=>pulse.setAttribute('opacity','0.13'));
-        g.addEventListener('mouseleave',()=>pulse.setAttribute('opacity','0'));
+        g.addEventListener('mouseenter',(e)=>{
+          pulse.setAttribute('opacity','0.13');
+          showStationTooltip(e, line, stn, card, false);
+          recordHoverStart(stn.id);
+        });
+        g.addEventListener('mousemove',(e)=>moveTooltip(e));
+        g.addEventListener('mouseleave',()=>{
+          pulse.setAttribute('opacity','0');
+          hideTooltip();
+          recordHoverEnd(stn.id);
+        });
         g.appendChild(pulse);
         g.addEventListener('click',()=>openCard(line,stn,card,idx));
+      } else if(isDone){
+        g.addEventListener('mouseenter',(e)=>showStationTooltip(e, line, stn, card, true));
+        g.addEventListener('mousemove',(e)=>moveTooltip(e));
+        g.addEventListener('mouseleave',()=>hideTooltip());
       }
 
       const r=stn.isEnd?14:10;
@@ -607,6 +638,54 @@ function showToast(msg){
   t.textContent=msg; t.classList.add('show');
   setTimeout(()=>t.classList.remove('show'),2800);
 }
+
+
+// ── TOOLTIP ──
+const tooltip = document.getElementById('stn-tooltip');
+function showStationTooltip(e, line, stn, card, done){
+  const meta = LINE_META[line];
+  document.getElementById('stn-tooltip-line').textContent = meta.label;
+  document.getElementById('stn-tooltip-line').style.color = meta.color;
+  document.getElementById('stn-tooltip-q').textContent = card.q;
+  document.getElementById('stn-tooltip-hint').textContent = done ? '✓ Already answered' : 'Click to open this card';
+  document.getElementById('stn-tooltip-hint').style.color = done ? meta.color : 'rgba(255,255,255,.35)';
+  tooltip.classList.add('visible');
+  positionTooltip(e);
+}
+function moveTooltip(e){ positionTooltip(e); }
+function positionTooltip(e){
+  const x = e.clientX, y = e.clientY;
+  const tw = 270, th = 100;
+  const vw = window.innerWidth, vh = window.innerHeight;
+  let left = x + 16, top = y - 20;
+  if(left + tw > vw) left = x - tw - 16;
+  if(top + th > vh) top = y - th - 10;
+  tooltip.style.left = left + 'px';
+  tooltip.style.top = top + 'px';
+}
+function hideTooltip(){ tooltip.classList.remove('visible'); }
+
+// ── HOVER ANALYTICS ──
+const hoverLog = {};   // stn.id -> { totalMs, sessions, hoverStart }
+function recordHoverStart(id){
+  if(!hoverLog[id]) hoverLog[id] = {totalMs:0, sessions:0, hoverStart:null};
+  hoverLog[id].hoverStart = Date.now();
+}
+function recordHoverEnd(id){
+  if(!hoverLog[id] || !hoverLog[id].hoverStart) return;
+  const ms = Date.now() - hoverLog[id].hoverStart;
+  hoverLog[id].totalMs += ms;
+  hoverLog[id].sessions++;
+  hoverLog[id].hoverStart = null;
+}
+function getHoverAnalytics(){
+  // Returns sorted list: most-hovered stations first
+  return Object.entries(hoverLog)
+    .map(([id, data]) => ({id, totalMs: data.totalMs, sessions: data.sessions, avgMs: data.sessions ? Math.round(data.totalMs/data.sessions) : 0}))
+    .sort((a,b) => b.totalMs - a.totalMs);
+}
+// Expose for Google Sheets integration later
+window.getHoverAnalytics = getHoverAnalytics;
 
 document.addEventListener('DOMContentLoaded',()=>showScreen('intro'));
 </script>
