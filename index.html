@@ -105,6 +105,26 @@ body{font-family:'Syne',sans-serif;background:var(--bg);color:var(--dark);min-he
 .btn-skip:hover{border-color:#bbb;}
 .btn-ans{flex:2;padding:13px;border:none;border-radius:10px;font-family:'Syne',sans-serif;font-size:13px;font-weight:700;color:white;cursor:pointer;transition:all .2s;}
 .btn-ans:hover{filter:brightness(1.1);transform:translateY(-1px);}
+/* CARD PICKER */
+.picker-overlay{position:fixed;inset:0;background:rgba(0,0,0,.75);backdrop-filter:blur(6px);z-index:200;display:none;align-items:center;justify-content:center;padding:20px;}
+.picker-overlay.open{display:flex;}
+.picker-box{background:white;border-radius:22px;max-width:680px;width:100%;max-height:88vh;overflow:hidden;display:flex;flex-direction:column;box-shadow:0 40px 100px rgba(0,0,0,.35);animation:pop .38s cubic-bezier(.34,1.56,.64,1) forwards;}
+.picker-head{padding:20px 24px 18px;display:flex;align-items:center;justify-content:space-between;border-bottom:1px solid #F0F0F0;flex-shrink:0;}
+.picker-head-left{display:flex;align-items:center;gap:10px;}
+.picker-tag{font-family:'Space Mono',monospace;font-size:9px;letter-spacing:3px;text-transform:uppercase;font-weight:700;color:white;padding:5px 14px;border-radius:100px;}
+.picker-count{font-family:'Space Mono',monospace;font-size:10px;color:rgba(0,0,0,.35);}
+.btn-close-picker{background:#F5F5F5;border:none;color:#666;width:32px;height:32px;border-radius:50%;font-size:16px;cursor:pointer;display:flex;align-items:center;justify-content:center;transition:background .2s;flex-shrink:0;}
+.btn-close-picker:hover{background:#E8E8E8;}
+.picker-grid{padding:16px 20px 20px;overflow-y:auto;display:grid;grid-template-columns:1fr 1fr;gap:10px;}
+@media(max-width:600px){.picker-grid{grid-template-columns:1fr;}}
+.picker-card{border:1.5px solid #EBEBEB;border-radius:14px;padding:14px 16px;cursor:pointer;transition:all .2s;position:relative;background:white;}
+.picker-card:hover{border-color:var(--card-accent);transform:translateY(-2px);box-shadow:0 6px 20px rgba(0,0,0,.08);}
+.picker-card.done{background:#F8F8F8;opacity:.5;cursor:default;pointer-events:none;}
+.picker-card-num{font-family:'Space Mono',monospace;font-size:8px;letter-spacing:2px;color:rgba(0,0,0,.3);margin-bottom:6px;}
+.picker-card-q{font-size:13px;font-weight:600;line-height:1.45;color:var(--dark);margin-bottom:10px;}
+.picker-card-concept{font-size:10px;font-weight:700;padding:4px 10px;border-radius:100px;display:inline-block;}
+.picker-card-done-badge{position:absolute;top:10px;right:10px;font-size:10px;font-weight:700;color:white;padding:3px 8px;border-radius:100px;}
+
 /* TIME UP OVERLAY */
 .timeup-overlay{position:fixed;inset:0;background:rgba(0,0,0,.85);backdrop-filter:blur(8px);z-index:250;display:none;align-items:center;justify-content:center;padding:20px;}
 .timeup-overlay.open{display:flex;}
@@ -250,6 +270,20 @@ body{font-family:'Syne',sans-serif;background:var(--bg);color:var(--dark);min-he
   <button class="btn-restart" onclick="showScreen('intro')">Play Again</button>
 </div>
 
+
+<!-- CARD PICKER -->
+<div class="picker-overlay" id="picker-overlay">
+  <div class="picker-box">
+    <div class="picker-head">
+      <div class="picker-head-left">
+        <div class="picker-tag" id="picker-tag"></div>
+        <div class="picker-count" id="picker-count"></div>
+      </div>
+      <button class="btn-close-picker" onclick="closePicker()">✕</button>
+    </div>
+    <div class="picker-grid" id="picker-grid"></div>
+  </div>
+</div>
 <!-- CARD MODAL -->
 <div class="overlay" id="card-overlay">
   <div class="modal-card" id="modal-inner"></div>
@@ -327,6 +361,9 @@ const STATIONS={
 
 // ── STATE ──
 let groupName='', minutesPerLine=15, currentLine=1;
+// ── GOOGLE SHEETS ── replace with your own Apps Script URL
+const SHEETS_URL = 'https://script.google.com/macros/s/AKfycbxpmRA-GpC8_HpDBFarLwwPRxfGZz-_ouLEuSuE95W_RDdHrUhktNazLehK3KveAV0gsA/exec';
+let sessionId = Date.now().toString(36) + Math.random().toString(36).slice(2,6);
 let completed={1:[],2:[],3:[]};
 let timerInterval=null, secondsLeft=0;
 let activeStationData=null;
@@ -498,7 +535,7 @@ function renderBoard(){
           recordHoverEnd(stn.id);
         });
         g.appendChild(pulse);
-        g.addEventListener('click',()=>openCard(line,stn,card,idx));
+        g.addEventListener('click',()=>openPicker(line));
       } else if(isDone){
         g.addEventListener('mouseenter',(e)=>showStationTooltip(e, line, stn, card, true));
         g.addEventListener('mousemove',(e)=>moveTooltip(e));
@@ -551,6 +588,53 @@ function renderBoard(){
   svg.appendChild(wm);
 }
 
+
+// ── CARD PICKER ──
+function openPicker(line){
+  const meta = LINE_META[line];
+  const cards = CARDS[line];
+  const stns = STATIONS[line];
+
+  document.getElementById('picker-tag').textContent = meta.label + ' · ' + meta.name;
+  document.getElementById('picker-tag').style.background = meta.color;
+
+  const remaining = cards.length - completed[line].length;
+  document.getElementById('picker-count').textContent = remaining + ' question' + (remaining!==1?'s':'') + ' remaining';
+
+  const grid = document.getElementById('picker-grid');
+  grid.innerHTML = '';
+
+  cards.forEach((card, idx) => {
+    const stn = stns[idx];
+    const isDone = completed[line].includes(stn.id);
+
+    const div = document.createElement('div');
+    div.className = 'picker-card' + (isDone?' done':'');
+    div.style.setProperty('--card-accent', meta.color);
+
+    div.innerHTML = `
+      <div class="picker-card-num">STATION ${stn.n}</div>
+      <div class="picker-card-q">${card.q}</div>
+      <div class="picker-card-concept" style="background:${meta.color}18;color:${meta.color}">${card.concept}</div>
+      ${isDone ? `<div class="picker-card-done-badge" style="background:${meta.color}">✓ Done</div>` : ''}
+    `;
+
+    if(!isDone){
+      div.addEventListener('click', ()=>{
+        closePicker();
+        openCard(line, stn, card, idx);
+      });
+    }
+    grid.appendChild(div);
+  });
+
+  document.getElementById('picker-overlay').classList.add('open');
+}
+
+function closePicker(){
+  document.getElementById('picker-overlay').classList.remove('open');
+}
+
 // ── CARD ──
 function openCard(line,stn,card,idx){
   activeStationData={line,stn,card};
@@ -588,20 +672,45 @@ function completeStation(){
   if(!activeStationData) return;
   const{line,stn}=activeStationData;
   if(!completed[line].includes(stn.id)) completed[line].push(stn.id);
+
+  // Capture notes before closing
+  const notesEl = document.querySelector('#modal-inner textarea');
+  const notes = notesEl ? notesEl.value.trim() : '';
+
+  // Hover data for this station
+  const hover = hoverLog[stn.id] || {totalMs:0, sessions:0};
+
+  // Send to Google Sheets
+  sendToSheets({
+    event: 'station_complete',
+    sessionId,
+    groupName,
+    line: LINE_META[line].label,
+    stationId: stn.id,
+    stationN: stn.n,
+    question: activeStationData.card.q,
+    concept: activeStationData.card.concept,
+    notes,
+    hoverMs: hover.totalMs,
+    hoverSessions: hover.sessions,
+    timestamp: new Date().toISOString(),
+    secondsLeft
+  });
+
   closeCard();
   updateSidebar(); updateTopbar(); renderBoard();
 
-  // Check full game completion
   const allDone=[1,2,3].every(l=>completed[l].length===CARDS[l].length);
   if(allDone){ clearInterval(timerInterval); setTimeout(()=>showScreen('end'),600); return; }
 
-  // If current line just got fully completed, show line-complete message
   if(completed[line].length===CARDS[line].length && line<3){
     showLineComplete(line);
     return;
   }
 
-  showToast('✓ Station complete! Move your pawn forward.');
+  // Reopen picker so group can choose next question (answered one is now greyed out)
+  setTimeout(()=>openPicker(line), 300);
+  showToast('✓ Station complete! Choose the next question.');
 }
 
 function showLineComplete(line){
@@ -686,6 +795,30 @@ function getHoverAnalytics(){
 }
 // Expose for Google Sheets integration later
 window.getHoverAnalytics = getHoverAnalytics;
+
+// ── SEND TO GOOGLE SHEETS ──
+function sendToSheets(data){
+  if(!SHEETS_URL || SHEETS_URL==='YOUR_APPS_SCRIPT_URL_HERE') return; // not configured yet
+  fetch(SHEETS_URL, {
+    method:'POST',
+    mode:'no-cors',
+    headers:{'Content-Type':'application/json'},
+    body: JSON.stringify(data)
+  }).catch(()=>{}); // silent fail — never block the game
+}
+
+// Send session_start when game launches
+const _origStartGame = startGame;
+startGame = function(){
+  _origStartGame();
+  sendToSheets({
+    event:'session_start',
+    sessionId,
+    groupName: document.getElementById('group-name-input').value.trim()||'Team 1',
+    minutesPerLine: parseInt(document.getElementById('timer-input').value)||15,
+    timestamp: new Date().toISOString()
+  });
+};
 
 document.addEventListener('DOMContentLoaded',()=>showScreen('intro'));
 </script>
