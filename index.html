@@ -6,1144 +6,609 @@
 <title>PBL Game — Start Your Journey</title>
 <link href="https://fonts.googleapis.com/css2?family=Space+Mono:wght@400;700&family=Syne:wght@400;600;700;800&display=swap" rel="stylesheet">
 <style>
-  :root {
-    --line1: #F37E4C;
-    --line2: #795CDC;
-    --line3: #3C7C54;
-    --green: #4EA72E;
-    --bg: #F5F0E8;
-    --dark: #1A1A2E;
-    --card-bg: #FFFFFF;
-    --station-size: 14px;
-    --track: 4px;
-  }
-
-  * { margin: 0; padding: 0; box-sizing: border-box; }
-
-  body {
-    font-family: 'Syne', sans-serif;
-    background: var(--bg);
-    color: var(--dark);
-    min-height: 100vh;
-    overflow-x: hidden;
-  }
-
-  /* ── SCREENS ── */
-  .screen { display: none; min-height: 100vh; }
-  .screen.active { display: flex; flex-direction: column; }
-
-  /* ── INTRO SCREEN ── */
-  #screen-intro {
-    align-items: center;
-    justify-content: center;
-    background: var(--dark);
-    position: relative;
-    overflow: hidden;
-  }
-
-  #screen-intro::before {
-    content: '';
-    position: absolute;
-    inset: 0;
-    background: 
-      radial-gradient(circle at 20% 50%, rgba(243,126,76,0.15) 0%, transparent 50%),
-      radial-gradient(circle at 80% 30%, rgba(121,92,220,0.15) 0%, transparent 50%),
-      radial-gradient(circle at 50% 80%, rgba(60,124,84,0.15) 0%, transparent 50%);
-  }
-
-  .intro-content {
-    text-align: center;
-    position: relative;
-    z-index: 1;
-    padding: 40px;
-  }
-
-  .intro-tag {
-    font-family: 'Space Mono', monospace;
-    font-size: 11px;
-    letter-spacing: 4px;
-    color: var(--green);
-    text-transform: uppercase;
-    margin-bottom: 20px;
-    opacity: 0;
-    animation: fadeUp 0.6s ease forwards 0.2s;
-  }
-
-  .intro-title {
-    font-size: clamp(56px, 10vw, 100px);
-    font-weight: 800;
-    color: #fff;
-    line-height: 0.9;
-    letter-spacing: -3px;
-    margin-bottom: 8px;
-    opacity: 0;
-    animation: fadeUp 0.6s ease forwards 0.4s;
-  }
-
-  .intro-title span {
-    display: block;
-    font-size: clamp(24px, 4vw, 40px);
-    font-weight: 400;
-    letter-spacing: 2px;
-    color: rgba(255,255,255,0.5);
-    margin-top: 10px;
-  }
-
-  .intro-subtitle {
-    font-family: 'Space Mono', monospace;
-    font-size: 13px;
-    color: rgba(255,255,255,0.4);
-    margin: 32px 0 48px;
-    line-height: 1.8;
-    opacity: 0;
-    animation: fadeUp 0.6s ease forwards 0.6s;
-  }
-
-  .line-pills {
-    display: flex;
-    gap: 12px;
-    justify-content: center;
-    margin-bottom: 48px;
-    opacity: 0;
-    animation: fadeUp 0.6s ease forwards 0.8s;
-  }
-
-  .pill {
-    padding: 6px 16px;
-    border-radius: 100px;
-    font-size: 11px;
-    font-weight: 700;
-    letter-spacing: 1px;
-    text-transform: uppercase;
-    color: white;
-  }
-  .pill-1 { background: var(--line1); }
-  .pill-2 { background: var(--line2); }
-  .pill-3 { background: var(--line3); }
-
-  .btn-start {
-    background: var(--green);
-    color: white;
-    border: none;
-    padding: 18px 52px;
-    font-family: 'Syne', sans-serif;
-    font-size: 16px;
-    font-weight: 700;
-    letter-spacing: 2px;
-    text-transform: uppercase;
-    border-radius: 4px;
-    cursor: pointer;
-    transition: all 0.2s;
-    opacity: 0;
-    animation: fadeUp 0.6s ease forwards 1s;
-    position: relative;
-    overflow: hidden;
-  }
-
-  .btn-start::after {
-    content: '';
-    position: absolute;
-    inset: 0;
-    background: rgba(255,255,255,0.1);
-    transform: translateX(-100%);
-    transition: transform 0.3s ease;
-  }
-
-  .btn-start:hover::after { transform: translateX(0); }
-  .btn-start:hover { transform: translateY(-2px); box-shadow: 0 8px 24px rgba(78,167,46,0.4); }
-
-  /* ── SETUP SCREEN ── */
-  #screen-setup {
-    align-items: center;
-    justify-content: center;
-    padding: 40px 20px;
-    background: var(--bg);
-  }
-
-  .setup-box {
-    background: white;
-    border-radius: 16px;
-    padding: 48px;
-    max-width: 540px;
-    width: 100%;
-    box-shadow: 0 4px 40px rgba(0,0,0,0.08);
-  }
-
-  .setup-box h2 {
-    font-size: 28px;
-    font-weight: 800;
-    margin-bottom: 8px;
-  }
-
-  .setup-box p {
-    font-family: 'Space Mono', monospace;
-    font-size: 12px;
-    color: rgba(0,0,0,0.4);
-    margin-bottom: 36px;
-  }
-
-  .team-input-group { margin-bottom: 20px; }
-
-  .team-input-group label {
-    display: block;
-    font-size: 12px;
-    font-weight: 700;
-    letter-spacing: 2px;
-    text-transform: uppercase;
-    margin-bottom: 8px;
-    color: rgba(0,0,0,0.5);
-  }
-
-  .team-input-group input {
-    width: 100%;
-    padding: 14px 16px;
-    border: 2px solid #E8E8E8;
-    border-radius: 8px;
-    font-family: 'Syne', sans-serif;
-    font-size: 16px;
-    font-weight: 600;
-    outline: none;
-    transition: border-color 0.2s;
-  }
-
-  .team-input-group input:focus { border-color: var(--green); }
-
-  #teams-container { margin-bottom: 28px; }
-
-  .btn-add-team {
-    background: none;
-    border: 2px dashed #ccc;
-    border-radius: 8px;
-    padding: 12px;
-    width: 100%;
-    font-family: 'Syne', sans-serif;
-    font-size: 14px;
-    color: #999;
-    cursor: pointer;
-    transition: all 0.2s;
-    margin-bottom: 28px;
-  }
-
-  .btn-add-team:hover { border-color: var(--green); color: var(--green); }
-
-  .btn-primary {
-    background: var(--dark);
-    color: white;
-    border: none;
-    padding: 16px 32px;
-    font-family: 'Syne', sans-serif;
-    font-size: 15px;
-    font-weight: 700;
-    letter-spacing: 1px;
-    border-radius: 8px;
-    cursor: pointer;
-    width: 100%;
-    transition: all 0.2s;
-  }
-
-  .btn-primary:hover { background: var(--green); transform: translateY(-1px); }
-
-  /* ── GAME SCREEN ── */
-  #screen-game {
-    flex-direction: row;
-    height: 100vh;
-    overflow: hidden;
-  }
-
-  /* SIDEBAR */
-  .sidebar {
-    width: 220px;
-    min-width: 220px;
-    background: var(--dark);
-    color: white;
-    padding: 24px 16px;
-    display: flex;
-    flex-direction: column;
-    gap: 8px;
-    overflow-y: auto;
-  }
-
-  .sidebar-logo {
-    font-size: 18px;
-    font-weight: 800;
-    letter-spacing: -1px;
-    margin-bottom: 16px;
-    padding-bottom: 16px;
-    border-bottom: 1px solid rgba(255,255,255,0.1);
-  }
-
-  .sidebar-logo span {
-    display: block;
-    font-family: 'Space Mono', monospace;
-    font-size: 9px;
-    font-weight: 400;
-    letter-spacing: 3px;
-    color: rgba(255,255,255,0.4);
-    margin-top: 2px;
-  }
-
-  .sidebar-section {
-    font-family: 'Space Mono', monospace;
-    font-size: 9px;
-    letter-spacing: 3px;
-    text-transform: uppercase;
-    color: rgba(255,255,255,0.3);
-    padding: 12px 8px 4px;
-  }
-
-  .team-chip {
-    display: flex;
-    align-items: center;
-    gap: 10px;
-    padding: 10px 12px;
-    border-radius: 8px;
-    cursor: pointer;
-    transition: background 0.15s;
-    position: relative;
-  }
-
-  .team-chip:hover { background: rgba(255,255,255,0.05); }
-  .team-chip.active { background: rgba(255,255,255,0.1); }
-
-  .team-dot {
-    width: 10px; height: 10px;
-    border-radius: 50%;
-    flex-shrink: 0;
-  }
-
-  .team-chip-name {
-    font-size: 13px;
-    font-weight: 600;
-    flex: 1;
-    white-space: nowrap;
-    overflow: hidden;
-    text-overflow: ellipsis;
-  }
-
-  .team-chip-pos {
-    font-family: 'Space Mono', monospace;
-    font-size: 10px;
-    color: rgba(255,255,255,0.4);
-  }
-
-  .sidebar-turn-btn {
-    margin-top: auto;
-    background: var(--green);
-    color: white;
-    border: none;
-    padding: 14px;
-    border-radius: 8px;
-    font-family: 'Syne', sans-serif;
-    font-size: 13px;
-    font-weight: 700;
-    letter-spacing: 1px;
-    cursor: pointer;
-    transition: all 0.2s;
-    text-align: center;
-  }
-
-  .sidebar-turn-btn:hover { filter: brightness(1.1); }
-
-  /* MAIN BOARD */
-  .board-area {
-    flex: 1;
-    overflow: hidden;
-    position: relative;
-    background: var(--bg);
-  }
-
-  .board-header {
-    position: absolute;
-    top: 0; left: 0; right: 0;
-    padding: 16px 24px;
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    z-index: 10;
-    background: linear-gradient(to bottom, var(--bg) 70%, transparent);
-  }
-
-  .current-turn {
-    display: flex;
-    align-items: center;
-    gap: 10px;
-  }
-
-  .turn-label {
-    font-family: 'Space Mono', monospace;
-    font-size: 10px;
-    letter-spacing: 2px;
-    color: rgba(0,0,0,0.4);
-    text-transform: uppercase;
-  }
-
-  .turn-name {
-    font-size: 16px;
-    font-weight: 800;
-  }
-
-  .turn-dot {
-    width: 12px; height: 12px;
-    border-radius: 50%;
-  }
-
-  .line-legend {
-    display: flex;
-    gap: 16px;
-  }
-
-  .legend-item {
-    display: flex;
-    align-items: center;
-    gap: 6px;
-    font-family: 'Space Mono', monospace;
-    font-size: 10px;
-    font-weight: 700;
-    letter-spacing: 1px;
-  }
-
-  .legend-dot {
-    width: 10px; height: 10px;
-    border-radius: 50%;
-  }
-
-  /* SVG BOARD */
-  #board-svg {
-    width: 100%;
-    height: 100%;
-  }
-
-  /* STATION styles in SVG are inline */
-
-  /* ── CARD MODAL ── */
-  .modal-overlay {
-    position: fixed;
-    inset: 0;
-    background: rgba(0,0,0,0.7);
-    backdrop-filter: blur(4px);
-    z-index: 100;
-    display: none;
-    align-items: center;
-    justify-content: center;
-    padding: 20px;
-  }
-
-  .modal-overlay.open { display: flex; }
-
-  .card {
-    background: white;
-    border-radius: 20px;
-    max-width: 500px;
-    width: 100%;
-    overflow: hidden;
-    box-shadow: 0 32px 80px rgba(0,0,0,0.3);
-    animation: cardIn 0.4s cubic-bezier(0.34, 1.56, 0.64, 1) forwards;
-  }
-
-  @keyframes cardIn {
-    from { transform: scale(0.85) translateY(20px); opacity: 0; }
-    to { transform: scale(1) translateY(0); opacity: 1; }
-  }
-
-  .card-header {
-    padding: 24px 28px 20px;
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-  }
-
-  .card-line-tag {
-    font-family: 'Space Mono', monospace;
-    font-size: 10px;
-    letter-spacing: 3px;
-    text-transform: uppercase;
-    font-weight: 700;
-    color: white;
-    padding: 4px 12px;
-    border-radius: 100px;
-  }
-
-  .card-station-label {
-    font-family: 'Space Mono', monospace;
-    font-size: 11px;
-    color: rgba(0,0,0,0.35);
-    letter-spacing: 1px;
-  }
-
-  .card-body {
-    padding: 0 28px 28px;
-  }
-
-  .card-question {
-    font-size: 22px;
-    font-weight: 700;
-    line-height: 1.35;
-    margin-bottom: 20px;
-    color: var(--dark);
-  }
-
-  .card-divider {
-    height: 1px;
-    background: #F0F0F0;
-    margin-bottom: 20px;
-  }
-
-  .card-concept-label {
-    font-family: 'Space Mono', monospace;
-    font-size: 9px;
-    letter-spacing: 3px;
-    text-transform: uppercase;
-    color: rgba(0,0,0,0.35);
-    margin-bottom: 6px;
-  }
-
-  .card-concept {
-    font-size: 14px;
-    font-weight: 600;
-    padding: 10px 14px;
-    border-radius: 8px;
-    display: inline-block;
-    margin-bottom: 20px;
-  }
-
-  .card-goal-label {
-    font-family: 'Space Mono', monospace;
-    font-size: 9px;
-    letter-spacing: 3px;
-    text-transform: uppercase;
-    color: rgba(0,0,0,0.35);
-    margin-bottom: 6px;
-  }
-
-  .card-goal {
-    font-size: 13px;
-    line-height: 1.6;
-    color: rgba(0,0,0,0.6);
-    margin-bottom: 28px;
-  }
-
-  .card-actions {
-    display: flex;
-    gap: 10px;
-  }
-
-  .btn-close-card {
-    flex: 1;
-    padding: 14px;
-    border: 2px solid #E8E8E8;
-    background: none;
-    border-radius: 10px;
-    font-family: 'Syne', sans-serif;
-    font-size: 13px;
-    font-weight: 700;
-    cursor: pointer;
-    transition: all 0.2s;
-  }
-
-  .btn-close-card:hover { border-color: #ccc; }
-
-  .btn-done-card {
-    flex: 2;
-    padding: 14px;
-    border: none;
-    border-radius: 10px;
-    font-family: 'Syne', sans-serif;
-    font-size: 13px;
-    font-weight: 700;
-    color: white;
-    cursor: pointer;
-    transition: all 0.2s;
-  }
-
-  .btn-done-card:hover { filter: brightness(1.1); transform: translateY(-1px); }
-
-  /* ── TOAST ── */
-  .toast {
-    position: fixed;
-    bottom: 32px;
-    left: 50%;
-    transform: translateX(-50%) translateY(80px);
-    background: var(--dark);
-    color: white;
-    padding: 14px 28px;
-    border-radius: 100px;
-    font-size: 13px;
-    font-weight: 600;
-    z-index: 200;
-    transition: transform 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
-    white-space: nowrap;
-  }
-
-  .toast.show { transform: translateX(-50%) translateY(0); }
-
-  /* ── WINNER SCREEN ── */
-  #screen-winner {
-    align-items: center;
-    justify-content: center;
-    background: var(--dark);
-    text-align: center;
-    padding: 40px;
-  }
-
-  .winner-emoji { font-size: 80px; margin-bottom: 24px; animation: bounce 1s ease infinite alternate; }
-
-  @keyframes bounce {
-    from { transform: translateY(0); }
-    to { transform: translateY(-12px); }
-  }
-
-  .winner-title {
-    font-size: clamp(40px, 8vw, 72px);
-    font-weight: 800;
-    color: white;
-    letter-spacing: -2px;
-    margin-bottom: 8px;
-  }
-
-  .winner-name {
-    font-size: clamp(24px, 5vw, 48px);
-    font-weight: 800;
-    margin-bottom: 32px;
-  }
-
-  .btn-restart {
-    background: var(--green);
-    color: white;
-    border: none;
-    padding: 16px 40px;
-    border-radius: 8px;
-    font-family: 'Syne', sans-serif;
-    font-size: 15px;
-    font-weight: 700;
-    cursor: pointer;
-    letter-spacing: 1px;
-    transition: all 0.2s;
-  }
-
-  .btn-restart:hover { filter: brightness(1.1); transform: translateY(-2px); }
-
-  @keyframes fadeUp {
-    from { opacity: 0; transform: translateY(16px); }
-    to { opacity: 1; transform: translateY(0); }
-  }
-
-  /* Responsive */
-  @media (max-width: 768px) {
-    #screen-game { flex-direction: column; }
-    .sidebar { width: 100%; min-width: unset; flex-direction: row; flex-wrap: wrap; height: auto; overflow-x: auto; padding: 12px; }
-    .sidebar-logo { display: none; }
-    .sidebar-section { display: none; }
-    .sidebar-turn-btn { margin-top: 0; }
-    .board-area { flex: 1; }
-  }
+:root{--l1:#F37E4C;--l2:#795CDC;--l3:#3C7C54;--green:#4EA72E;--bg:#F5F0E8;--dark:#1A1A2E;}
+*{margin:0;padding:0;box-sizing:border-box;}
+body{font-family:'Syne',sans-serif;background:var(--bg);color:var(--dark);min-height:100vh;overflow-x:hidden;}
+.screen{display:none;min-height:100vh;}
+.screen.active{display:flex;flex-direction:column;}
+
+/* INTRO */
+#screen-intro{align-items:center;justify-content:center;background:var(--dark);position:relative;overflow:hidden;}
+#screen-intro::before{content:'';position:absolute;inset:0;background:radial-gradient(circle at 15% 55%,rgba(243,126,76,.2) 0%,transparent 45%),radial-gradient(circle at 80% 25%,rgba(121,92,220,.2) 0%,transparent 45%),radial-gradient(circle at 50% 85%,rgba(60,124,84,.2) 0%,transparent 45%);}
+.intro-inner{text-align:center;position:relative;z-index:1;padding:40px 24px;}
+.intro-eyebrow{font-family:'Space Mono',monospace;font-size:10px;letter-spacing:5px;color:var(--green);text-transform:uppercase;margin-bottom:20px;opacity:0;animation:fadeUp .5s ease forwards .2s;}
+.intro-title{font-size:clamp(72px,14vw,130px);font-weight:800;color:#fff;line-height:.85;letter-spacing:-5px;opacity:0;animation:fadeUp .5s ease forwards .35s;}
+.intro-game{font-size:clamp(18px,3.5vw,32px);font-weight:400;letter-spacing:6px;color:rgba(255,255,255,.3);margin:10px 0 44px;opacity:0;animation:fadeUp .5s ease forwards .5s;}
+.line-pills{display:flex;gap:10px;justify-content:center;flex-wrap:wrap;margin-bottom:48px;opacity:0;animation:fadeUp .5s ease forwards .65s;}
+.pill{padding:6px 18px;border-radius:100px;font-size:11px;font-weight:700;letter-spacing:1px;text-transform:uppercase;color:white;}
+.pill-1{background:var(--l1);}.pill-2{background:var(--l2);}.pill-3{background:var(--l3);}
+.intro-btns{display:flex;gap:12px;justify-content:center;flex-wrap:wrap;opacity:0;animation:fadeUp .5s ease forwards .8s;}
+.btn-cta{background:var(--green);color:white;border:none;padding:18px 52px;font-family:'Syne',sans-serif;font-size:16px;font-weight:700;letter-spacing:2px;text-transform:uppercase;border-radius:6px;cursor:pointer;transition:all .2s;}
+.btn-cta:hover{transform:translateY(-3px);box-shadow:0 10px 28px rgba(78,167,46,.45);}
+.btn-ghost{background:rgba(255,255,255,.08);color:rgba(255,255,255,.7);border:none;padding:18px 32px;font-family:'Syne',sans-serif;font-size:14px;font-weight:600;letter-spacing:1px;border-radius:6px;cursor:pointer;transition:all .2s;}
+.btn-ghost:hover{background:rgba(255,255,255,.14);}
+
+/* SETUP */
+#screen-setup{align-items:center;justify-content:center;padding:40px 20px;}
+.setup-card{background:white;border-radius:20px;padding:48px 40px;max-width:460px;width:100%;box-shadow:0 4px 40px rgba(0,0,0,.09);}
+.setup-card h2{font-size:30px;font-weight:800;margin-bottom:6px;}
+.setup-sub{font-family:'Space Mono',monospace;font-size:11px;color:rgba(0,0,0,.4);margin-bottom:36px;}
+.field{margin-bottom:20px;}
+.field label{display:block;font-size:11px;font-weight:700;letter-spacing:2px;text-transform:uppercase;color:rgba(0,0,0,.45);margin-bottom:8px;}
+.field input{width:100%;padding:14px 16px;border:2px solid #EBEBEB;border-radius:10px;font-family:'Syne',sans-serif;font-size:16px;font-weight:600;outline:none;transition:border-color .2s;}
+.field input:focus{border-color:var(--green);}
+.field-row{display:flex;gap:12px;align-items:flex-start;}
+.field-row .field{flex:1;}
+.timer-hint{font-family:'Space Mono',monospace;font-size:10px;color:rgba(0,0,0,.35);line-height:1.75;padding-top:34px;}
+.btn-launch{background:var(--dark);color:white;border:none;padding:17px 32px;font-family:'Syne',sans-serif;font-size:15px;font-weight:700;letter-spacing:1px;border-radius:10px;cursor:pointer;width:100%;transition:all .2s;margin-top:8px;}
+.btn-launch:hover{background:var(--green);transform:translateY(-1px);}
+
+/* GAME */
+#screen-game{flex-direction:row;height:100vh;overflow:hidden;}
+.sidebar{width:220px;min-width:220px;background:var(--dark);color:white;padding:20px 14px;display:flex;flex-direction:column;gap:4px;overflow-y:auto;}
+.sb-logo{font-size:17px;font-weight:800;letter-spacing:-1px;margin-bottom:2px;}
+.sb-logo span{display:block;font-family:'Space Mono',monospace;font-size:8px;letter-spacing:3px;color:rgba(255,255,255,.28);margin-top:2px;}
+.sb-div{height:1px;background:rgba(255,255,255,.07);margin:10px 0;}
+.sb-label{font-family:'Space Mono',monospace;font-size:8px;letter-spacing:3px;text-transform:uppercase;color:rgba(255,255,255,.28);padding:4px 8px;}
+.sb-group{display:flex;align-items:center;gap:10px;padding:10px;border-radius:10px;background:rgba(255,255,255,.06);margin-bottom:4px;}
+.sb-group-dot{width:10px;height:10px;border-radius:50%;background:var(--green);}
+.sb-group-name{font-size:14px;font-weight:700;flex:1;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+.lp-item{padding:10px;border-radius:10px;margin-bottom:4px;transition:all .2s;}
+.lp-item.active-line{background:rgba(255,255,255,.07);}
+.lp-top{display:flex;align-items:center;gap:8px;margin-bottom:6px;}
+.lp-dot{width:8px;height:8px;border-radius:50%;flex-shrink:0;}
+.lp-name{font-size:12px;font-weight:700;flex:1;}
+.lp-lock{font-size:10px;}
+.lp-bar-bg{height:4px;background:rgba(255,255,255,.1);border-radius:100px;overflow:hidden;}
+.lp-bar-fill{height:100%;border-radius:100px;transition:width .5s ease;}
+.lp-count{font-family:'Space Mono',monospace;font-size:9px;color:rgba(255,255,255,.3);margin-top:4px;}
+.sb-timer{background:rgba(255,255,255,.05);border-radius:12px;padding:14px 12px;text-align:center;margin:8px 0;}
+.sb-timer-label{font-family:'Space Mono',monospace;font-size:8px;letter-spacing:3px;color:rgba(255,255,255,.3);margin-bottom:6px;text-transform:uppercase;}
+.sb-timer-val{font-family:'Space Mono',monospace;font-size:30px;font-weight:700;color:white;letter-spacing:3px;}
+.sb-timer-val.warn{color:#F37E4C;}.sb-timer-val.danger{color:#E74C3C;}
+.sb-timer-sub{font-size:10px;color:rgba(255,255,255,.28);margin-top:4px;}
+.sb-btns{margin-top:auto;display:flex;flex-direction:column;gap:8px;}
+.btn-sb{padding:12px;border-radius:8px;border:none;font-family:'Syne',sans-serif;font-size:12px;font-weight:700;letter-spacing:1px;cursor:pointer;transition:all .2s;text-align:center;}
+.btn-green{background:var(--green);color:white;}.btn-green:hover{filter:brightness(1.1);}
+.btn-muted{background:rgba(255,255,255,.07);color:rgba(255,255,255,.55);}.btn-muted:hover{background:rgba(255,255,255,.12);color:white;}
+
+/* BOARD */
+.board-wrap{flex:1;display:flex;flex-direction:column;overflow:hidden;background:var(--bg);}
+.board-topbar{padding:12px 24px;display:flex;align-items:center;justify-content:space-between;border-bottom:1px solid rgba(0,0,0,.06);flex-shrink:0;}
+.topbar-badge{display:flex;align-items:center;gap:8px;padding:7px 18px;border-radius:100px;color:white;font-size:12px;font-weight:700;}
+.topbar-hint{font-family:'Space Mono',monospace;font-size:10px;color:rgba(0,0,0,.38);margin-left:12px;}
+.topbar-left{display:flex;align-items:center;}
+.btn-instr{background:white;border:1.5px solid #E0E0E0;color:var(--dark);border-radius:100px;padding:7px 18px;font-family:'Syne',sans-serif;font-size:12px;font-weight:700;cursor:pointer;transition:all .2s;}
+.btn-instr:hover{border-color:var(--dark);}
+.board-svg-wrap{flex:1;overflow:hidden;}
+#board-svg{width:100%;height:100%;}
+
+/* CARD MODAL */
+.overlay{position:fixed;inset:0;background:rgba(0,0,0,.72);backdrop-filter:blur(6px);z-index:200;display:none;align-items:center;justify-content:center;padding:20px;}
+.overlay.open{display:flex;}
+.modal-card{background:white;border-radius:22px;max-width:520px;width:100%;overflow:hidden;box-shadow:0 40px 100px rgba(0,0,0,.35);animation:pop .38s cubic-bezier(.34,1.56,.64,1) forwards;}
+@keyframes pop{from{transform:scale(.82) translateY(24px);opacity:0}to{transform:scale(1) translateY(0);opacity:1}}
+.mc-top{padding:20px 24px 18px;display:flex;align-items:center;justify-content:space-between;border-bottom:1px solid #F0F0F0;}
+.mc-tag{font-family:'Space Mono',monospace;font-size:9px;letter-spacing:3px;text-transform:uppercase;font-weight:700;color:white;padding:5px 14px;border-radius:100px;}
+.mc-station{font-family:'Space Mono',monospace;font-size:10px;color:rgba(0,0,0,.32);letter-spacing:1px;}
+.mc-body{padding:22px 24px 26px;}
+.mc-q{font-size:21px;font-weight:700;line-height:1.38;margin-bottom:20px;}
+.mc-sep{height:1px;background:#F0F0F0;margin-bottom:18px;}
+.mc-pill-label{font-family:'Space Mono',monospace;font-size:8px;letter-spacing:3px;text-transform:uppercase;color:rgba(0,0,0,.32);margin-bottom:6px;}
+.mc-concept{font-size:13px;font-weight:700;padding:8px 14px;border-radius:8px;display:inline-block;margin-bottom:16px;}
+.mc-goal{font-size:13px;line-height:1.65;color:rgba(0,0,0,.55);margin-bottom:22px;}
+.mc-notepad{background:#FFFDF0;border:1.5px solid #EEE090;border-radius:10px;padding:12px 14px;margin-bottom:22px;}
+.mc-notepad-lbl{font-family:'Space Mono',monospace;font-size:8px;letter-spacing:2px;text-transform:uppercase;color:rgba(0,0,0,.32);margin-bottom:6px;}
+.mc-notepad textarea{width:100%;border:none;background:transparent;resize:none;font-family:'Syne',sans-serif;font-size:13px;color:var(--dark);outline:none;min-height:56px;line-height:1.6;}
+.mc-actions{display:flex;gap:10px;}
+.btn-skip{flex:1;padding:13px;border:2px solid #EBEBEB;background:none;border-radius:10px;font-family:'Syne',sans-serif;font-size:13px;font-weight:700;cursor:pointer;transition:all .2s;}
+.btn-skip:hover{border-color:#bbb;}
+.btn-ans{flex:2;padding:13px;border:none;border-radius:10px;font-family:'Syne',sans-serif;font-size:13px;font-weight:700;color:white;cursor:pointer;transition:all .2s;}
+.btn-ans:hover{filter:brightness(1.1);transform:translateY(-1px);}
+/* TIME UP OVERLAY */
+.timeup-overlay{position:fixed;inset:0;background:rgba(0,0,0,.85);backdrop-filter:blur(8px);z-index:250;display:none;align-items:center;justify-content:center;padding:20px;}
+.timeup-overlay.open{display:flex;}
+.timeup-box{text-align:center;animation:pop .4s cubic-bezier(.34,1.56,.64,1) forwards;max-width:420px;}
+.timeup-icon{font-size:64px;margin-bottom:20px;}
+.timeup-title{font-size:clamp(28px,6vw,48px);font-weight:800;color:white;letter-spacing:-2px;margin-bottom:8px;}
+.timeup-sub{font-family:'Space Mono',monospace;font-size:11px;letter-spacing:2px;color:rgba(255,255,255,.4);margin-bottom:32px;line-height:1.9;}
+.timeup-badge{display:inline-flex;align-items:center;gap:10px;padding:12px 28px;border-radius:100px;color:white;font-size:15px;font-weight:700;margin-bottom:32px;}
+.timeup-btns{display:flex;gap:12px;justify-content:center;flex-wrap:wrap;}
+.btn-timeup-next{background:var(--green);color:white;border:none;padding:15px 36px;border-radius:8px;font-family:'Syne',sans-serif;font-size:14px;font-weight:700;cursor:pointer;letter-spacing:1px;transition:all .2s;}
+.btn-timeup-next:hover{filter:brightness(1.1);transform:translateY(-1px);}
+.btn-timeup-stay{background:rgba(255,255,255,.1);color:rgba(255,255,255,.7);border:none;padding:15px 28px;border-radius:8px;font-family:'Syne',sans-serif;font-size:14px;font-weight:600;cursor:pointer;transition:all .2s;}
+.btn-timeup-stay:hover{background:rgba(255,255,255,.18);color:white;}
+
+/* END */
+#screen-end{align-items:center;justify-content:center;background:var(--dark);text-align:center;padding:40px;}
+.end-emoji{font-size:72px;margin-bottom:24px;animation:bob 1.2s ease infinite alternate;}
+@keyframes bob{from{transform:translateY(0)}to{transform:translateY(-14px)}}
+.end-title{font-size:clamp(36px,7vw,64px);font-weight:800;color:white;letter-spacing:-2px;margin-bottom:8px;}
+.end-group{font-size:clamp(20px,4vw,36px);font-weight:800;margin-bottom:12px;}
+.end-sub{font-family:'Space Mono',monospace;font-size:11px;color:rgba(255,255,255,.3);letter-spacing:2px;margin-bottom:40px;line-height:1.9;}
+.btn-restart{background:var(--green);color:white;border:none;padding:16px 44px;border-radius:8px;font-family:'Syne',sans-serif;font-size:15px;font-weight:700;cursor:pointer;letter-spacing:1px;transition:all .2s;}
+.btn-restart:hover{filter:brightness(1.1);transform:translateY(-2px);}
+
+.toast{position:fixed;bottom:28px;left:50%;transform:translateX(-50%) translateY(70px);background:var(--dark);color:white;padding:13px 28px;border-radius:100px;font-size:13px;font-weight:600;z-index:500;transition:transform .3s cubic-bezier(.34,1.56,.64,1);white-space:nowrap;pointer-events:none;}
+.toast.show{transform:translateX(-50%) translateY(0);}
+@keyframes fadeUp{from{opacity:0;transform:translateY(16px)}to{opacity:1;transform:translateY(0)}}
 </style>
 </head>
 <body>
 
 <!-- INTRO -->
 <div id="screen-intro" class="screen active">
-  <div class="intro-content">
-    <div class="intro-tag">IT:U Interdisciplinary University</div>
-    <div class="intro-title">PBL<span>GAME</span></div>
-    <div class="intro-subtitle">
-      A learning journey for teams<br>
-      Choose your line · Draw a card · Start a conversation
-    </div>
+  <div class="intro-inner">
+    <div class="intro-eyebrow">IT:U · Center for Project-Based Learning</div>
+    <div class="intro-title">PBL</div>
+    <div class="intro-game">GAME · START YOUR JOURNEY</div>
     <div class="line-pills">
-      <div class="pill pill-1">LINE 1 · Know Each Other</div>
+      <div class="pill pill-1">LINE 1 · Get to Know Each Other</div>
       <div class="pill pill-2">LINE 2 · Individual Learning</div>
       <div class="pill pill-3">LINE 3 · Team Learning</div>
     </div>
-    <button class="btn-start" onclick="showScreen('setup')">Start Your Journey →</button>
+    <div class="intro-btns">
+      <button class="btn-cta" onclick="showScreen('setup')">Start Your Journey →</button>
+    </div>
   </div>
 </div>
 
 <!-- SETUP -->
 <div id="screen-setup" class="screen">
-  <div class="setup-box">
-    <h2>Set Up Teams</h2>
-    <p>Add the teams playing today</p>
-    <div id="teams-container"></div>
-    <button class="btn-add-team" onclick="addTeamInput()">+ Add another team</button>
-    <button class="btn-primary" onclick="startGame()">Launch Game →</button>
+  <div class="setup-card">
+    <h2>Set Up Your Group</h2>
+    <p class="setup-sub">One board per group — each group plays independently</p>
+    <div class="field">
+      <label>Group Name</label>
+      <input type="text" id="group-name-input" placeholder="e.g. Team 1" maxlength="30">
+    </div>
+    <div class="field-row">
+      <div class="field">
+        <label>Minutes per Line</label>
+        <input type="number" id="timer-input" value="15" min="1" max="90">
+      </div>
+      <div class="timer-hint">The moderator sets<br>how long each line<br>will take.</div>
+    </div>
+    <button class="btn-launch" onclick="startGame()">Launch Game →</button>
   </div>
 </div>
 
 <!-- GAME -->
 <div id="screen-game" class="screen">
   <div class="sidebar">
-    <div class="sidebar-logo">PBL Game<span>Start Your Journey</span></div>
-    <div class="sidebar-section">Teams</div>
-    <div id="teams-list"></div>
-    <button class="sidebar-turn-btn" onclick="nextTurn()">End Turn →</button>
-  </div>
-  <div class="board-area">
-    <div class="board-header">
-      <div class="current-turn">
-        <div class="turn-dot" id="turn-dot"></div>
-        <div>
-          <div class="turn-label">Current Turn</div>
-          <div class="turn-name" id="turn-name">—</div>
-        </div>
-      </div>
-      <div class="line-legend">
-        <div class="legend-item"><div class="legend-dot" style="background:var(--line1)"></div>LINE 1</div>
-        <div class="legend-item"><div class="legend-dot" style="background:var(--line2)"></div>LINE 2</div>
-        <div class="legend-item"><div class="legend-dot" style="background:var(--line3)"></div>LINE 3</div>
-      </div>
+    <div class="sb-logo">PBL Game<span>Start Your Journey</span></div>
+    <div class="sb-div"></div>
+    <div class="sb-label">Your Group</div>
+    <div class="sb-group">
+      <div class="sb-group-dot"></div>
+      <div class="sb-group-name" id="sb-group-name">—</div>
     </div>
-    <svg id="board-svg" viewBox="0 0 800 600" preserveAspectRatio="xMidYMid meet"></svg>
+    <div class="sb-div"></div>
+    <div class="sb-label">Progress</div>
+    <div class="lp-item" id="lp-1">
+      <div class="lp-top"><div class="lp-dot" style="background:var(--l1)"></div><div class="lp-name">LINE 1</div><div class="lp-lock" id="lp-lock-1"></div></div>
+      <div class="lp-bar-bg"><div class="lp-bar-fill" id="lp-bar-1" style="background:var(--l1);width:0%"></div></div>
+      <div class="lp-count" id="lp-count-1">0 / 9</div>
+    </div>
+    <div class="lp-item" id="lp-2">
+      <div class="lp-top"><div class="lp-dot" style="background:var(--l2)"></div><div class="lp-name">LINE 2</div><div class="lp-lock" id="lp-lock-2"></div></div>
+      <div class="lp-bar-bg"><div class="lp-bar-fill" id="lp-bar-2" style="background:var(--l2);width:0%"></div></div>
+      <div class="lp-count" id="lp-count-2">0 / 11</div>
+    </div>
+    <div class="lp-item" id="lp-3">
+      <div class="lp-top"><div class="lp-dot" style="background:var(--l3)"></div><div class="lp-name">LINE 3</div><div class="lp-lock" id="lp-lock-3"></div></div>
+      <div class="lp-bar-bg"><div class="lp-bar-fill" id="lp-bar-3" style="background:var(--l3);width:0%"></div></div>
+      <div class="lp-count" id="lp-count-3">0 / 12</div>
+    </div>
+    <div class="sb-div"></div>
+    <div class="sb-timer">
+      <div class="sb-timer-label">Time Remaining</div>
+      <div class="sb-timer-val" id="sb-timer-val">--:--</div>
+      <div class="sb-timer-sub" id="sb-timer-sub">—</div>
+    </div>
+    <div class="sb-btns">
+      <button class="btn-sb btn-green" id="btn-next-line" style="display:none" onclick="advanceLine()">→ Next Line</button>
+    </div>
+  </div>
+
+  <div class="board-wrap">
+    <div class="board-topbar">
+      <div class="topbar-left">
+        <div class="topbar-badge" id="topbar-badge"></div>
+        <div class="topbar-hint" id="topbar-hint"></div>
+      </div>
+      <button class="btn-instr" onclick="showScreen('intro')" style="font-size:11px;padding:6px 14px;color:rgba(0,0,0,.4);border-color:#E8E8E8;">← Exit</button>
+    </div>
+    <div class="board-svg-wrap">
+      <svg id="board-svg" viewBox="0 0 820 560" preserveAspectRatio="xMidYMid meet"></svg>
+    </div>
   </div>
 </div>
 
-<!-- WINNER -->
-<div id="screen-winner" class="screen">
-  <div class="winner-emoji">🎉</div>
-  <div class="winner-title">Journey Complete!</div>
-  <div class="winner-name" id="winner-name" style="color: var(--green)"></div>
-  <p style="color:rgba(255,255,255,0.4); font-family:'Space Mono',monospace; font-size:12px; margin-bottom:40px">has visited all stations</p>
+<!-- END -->
+<div id="screen-end" class="screen">
+  <div class="end-emoji">🎉</div>
+  <div class="end-title">Journey Complete!</div>
+  <div class="end-group" id="end-group-name" style="color:var(--green)"></div>
+  <div class="end-sub">has completed all three lines<br>You now have a shared understanding of PBL</div>
   <button class="btn-restart" onclick="showScreen('intro')">Play Again</button>
 </div>
 
 <!-- CARD MODAL -->
-<div class="modal-overlay" id="card-modal">
-  <div class="card">
-    <div class="card-header">
-      <div class="card-line-tag" id="modal-line-tag"></div>
-      <div class="card-station-label" id="modal-station-label"></div>
-    </div>
-    <div class="card-body">
-      <div class="card-question" id="modal-question"></div>
-      <div class="card-divider"></div>
-      <div class="card-concept-label">Key Concept</div>
-      <div class="card-concept" id="modal-concept"></div>
-      <div class="card-goal-label">Goal</div>
-      <div class="card-goal" id="modal-goal"></div>
-      <div class="card-actions">
-        <button class="btn-close-card" onclick="closeCard()">Skip</button>
-        <button class="btn-done-card" id="modal-done-btn" onclick="completeStation()">Answered! ✓</button>
-      </div>
+<div class="overlay" id="card-overlay">
+  <div class="modal-card" id="modal-inner"></div>
+</div>
+
+<!-- TIME UP OVERLAY -->
+<div class="timeup-overlay" id="timeup-overlay">
+  <div class="timeup-box">
+    <div class="timeup-icon">⏰</div>
+    <div class="timeup-title" id="timeup-title">Time's Up!</div>
+    <div class="timeup-sub" id="timeup-sub"></div>
+    <div class="timeup-badge" id="timeup-badge"></div>
+    <div class="timeup-btns">
+      <button class="btn-timeup-stay" onclick="closeTimeUp()">Stay on this line</button>
+      <button class="btn-timeup-next" id="btn-timeup-next" onclick="advanceLineFromTimeUp()">Move to Next Line →</button>
     </div>
   </div>
 </div>
 
-<!-- TOAST -->
 <div class="toast" id="toast"></div>
 
 <script>
-// ── DATA ──────────────────────────────────────────────────────────────────
-const LINES = {
-  1: { name: 'Get to Know Each Other', color: '#F37E4C', label: 'LINE 1' },
-  2: { name: 'Individual Learning',    color: '#795CDC', label: 'LINE 2' },
-  3: { name: 'Team Learning',          color: '#3C7C54', label: 'LINE 3' }
+const LINE_META={
+  1:{name:'Get to Know Each Other',color:'#F37E4C',label:'LINE 1'},
+  2:{name:'Individual Learning',color:'#795CDC',label:'LINE 2'},
+  3:{name:'Team Learning',color:'#3C7C54',label:'LINE 3'}
 };
-
-const CARDS = {
-  1: [
-    { q: 'Introduce yourself to the group.', concept: 'Psychological Safety & Belonging', goal: 'Build connections — helps participants get to know each other' },
-    { q: 'What is your research or academic background?', concept: 'Interdisciplinary Awareness & Identity', goal: 'Understand backgrounds — provides insight into each person\'s expertise' },
-    { q: 'What motivated you to enter your discipline? Was it planned or a happy accident?', concept: 'Interdisciplinary Awareness & Identity', goal: 'Explore motivations — shares personal stories behind career choices' },
-    { q: 'What\'s one thing about your field that you wish more people understood?', concept: 'Interdisciplinary Awareness & Identity', goal: 'Promote awareness — highlights key insights from different fields' },
-    { q: 'If you had to explain your field to a child in one sentence, how would you do it?', concept: 'Interdisciplinary Awareness & Identity', goal: 'Simplify complexity — encourages clear and accessible communication' },
-    { q: 'What\'s a skill or knowledge area from another discipline you wish you had or admire?', concept: 'Interdisciplinary Awareness & Identity', goal: 'Foster interdisciplinary appreciation — recognizes valuable skills from other disciplines' },
-    { q: 'What\'s the most exciting interdisciplinary project you\'ve worked on?', concept: 'Authentic & Experiential Learning', goal: 'Encourage collaboration — shares experiences of working across disciplines' },
-    { q: 'What motivated you to change your discipline and join IT:U?', concept: 'Psychological Safety & Belonging', goal: 'Motivation for IT:U, working interdisciplinarily' },
-    { q: 'What\'s a skill from your discipline that you are proud of and bring to the table?', concept: 'Interdisciplinary Awareness & Identity', goal: 'Interdisciplinary appreciation — recognizing benefits due to complementarity' },
+const CARDS={
+  1:[
+    {q:'Introduce yourself to the group.',concept:'Psychological Safety & Belonging',goal:'Build connections — helps participants get to know each other.'},
+    {q:'What is your research or academic background?',concept:'Interdisciplinary Awareness & Identity',goal:'Understand backgrounds — provides insight into each person\'s expertise.'},
+    {q:'What motivated you to enter your discipline? Was it planned or a happy accident?',concept:'Interdisciplinary Awareness & Identity',goal:'Explore motivations — shares personal stories behind career choices.'},
+    {q:'What\'s one thing about your field that you wish more people understood?',concept:'Interdisciplinary Awareness & Identity',goal:'Promote awareness — highlights key insights from different fields.'},
+    {q:'If you had to explain your field to a child in one sentence, how would you do it?',concept:'Interdisciplinary Awareness & Identity',goal:'Simplify complexity — encourages clear and accessible communication.'},
+    {q:'What\'s a skill or knowledge area from another discipline you wish you had or admire?',concept:'Interdisciplinary Awareness & Identity',goal:'Foster interdisciplinary appreciation — recognizes valuable skills from other disciplines.'},
+    {q:'What\'s the most exciting interdisciplinary project you\'ve worked on?',concept:'Authentic & Experiential Learning',goal:'Encourage collaboration — shares experiences of working across disciplines.'},
+    {q:'What motivated you to change your discipline and join IT:U?',concept:'Psychological Safety & Belonging',goal:'Explore motivation for IT:U and working interdisciplinarily.'},
+    {q:'What\'s a skill from your discipline that you are proud of and bring to the table?',concept:'Interdisciplinary Awareness & Identity',goal:'Interdisciplinary appreciation — recognizing benefits due to complementarity.'},
   ],
-  2: [
-    { q: 'What strategies do you use to stay motivated when learning something new?', concept: 'Self-Regulated Learning (SRL)', goal: 'Understand motivation — identifies what drives individuals to stay engaged' },
-    { q: 'How do you plan and manage your time when preparing for a big project or deadline?', concept: 'Self-Regulated Learning (SRL)', goal: 'Explore time management — reveals strategies for organizing work efficiently' },
-    { q: 'When you get stuck on a difficult problem or concept, what do you usually do?', concept: 'Self-Regulated Learning (SRL)', goal: 'Assess problem-solving approaches — uncovers strategies for overcoming learning obstacles' },
-    { q: 'Can you think of a time when you adjusted your study methods to improve your learning? What was the trigger?', concept: 'Metacognition & Reflection', goal: 'Encourage reflection on learning adaptation — highlights self-awareness and ability to refine learning techniques' },
-    { q: 'How do you adapt your learning approach when faced with a subject that doesn\'t come naturally?', concept: 'Self-Regulated Learning (SRL)', goal: 'Analyze learning flexibility — examines how individuals adjust their approach to challenging topics' },
-    { q: 'How do you usually learn from teammates who have a different approach or background?', concept: 'Co-Regulation & Peer Learning', goal: 'Bridge individual learning to team learning — connects personal learning style to collaborative PBL context' },
-    { q: 'When managing multiple projects or learning goals, how do you prioritize tasks while ensuring deep understanding?', concept: 'Self-Regulated Learning (SRL)', goal: 'Evaluate prioritization and deep learning strategies' },
-    { q: 'How do you integrate feedback — from peers, mentors, or self-reflection — into your learning process?', concept: 'Co-Regulation & Peer Learning', goal: 'Highlight the role of feedback in growth — demonstrates how input influences learning and improvement' },
-    { q: 'How do you usually coordinate team and individual goals? What are your strategies to coordinate vested interests?', concept: 'Socially Shared Regulated Learning (SSRL)', goal: 'Bridge individual learning to team learning — connects personal agendas to collaborative PBL context' },
-    { q: 'What are your expectations for working interdisciplinarily? What strategies do you apply?', concept: 'Socially Shared Regulated Learning (SSRL)', goal: 'Interdisciplinary collaboration — experiences and strategies' },
-    { q: 'What are your expectations for working, learning and innovating in teams?', concept: 'Socially Shared Regulated Learning (SSRL)', goal: 'Collaboration — experiences and strategies; socially shared regulated learning' },
+  2:[
+    {q:'What strategies do you use to stay motivated when learning something new?',concept:'Self-Regulated Learning (SRL)',goal:'Understand motivation — identifies what drives individuals to stay engaged.'},
+    {q:'How do you plan and manage your time when preparing for a big project or deadline?',concept:'Self-Regulated Learning (SRL)',goal:'Explore time management — reveals strategies for organizing work efficiently.'},
+    {q:'When you get stuck on a difficult problem or concept, what do you usually do?',concept:'Self-Regulated Learning (SRL)',goal:'Assess problem-solving approaches — uncovers strategies for overcoming learning obstacles.'},
+    {q:'Can you think of a time when you adjusted your study methods to improve your learning? What was the trigger?',concept:'Metacognition & Reflection',goal:'Encourage reflection on learning adaptation — highlights self-awareness and ability to refine techniques.'},
+    {q:'How do you adapt your learning approach when faced with a subject that doesn\'t come naturally to you?',concept:'Self-Regulated Learning (SRL)',goal:'Analyze learning flexibility — examines how individuals adjust their approach to challenging topics.'},
+    {q:'How do you usually learn from teammates who have a different approach or background?',concept:'Co-Regulation & Peer Learning',goal:'Bridge individual learning to team learning — connects personal style to collaborative PBL context.'},
+    {q:'When managing multiple projects or learning goals, how do you prioritize tasks while ensuring deep understanding?',concept:'Self-Regulated Learning (SRL)',goal:'Evaluate prioritization and deep learning strategies.'},
+    {q:'How do you integrate feedback — from peers, mentors, or self-reflection — into your learning process?',concept:'Co-Regulation & Peer Learning',goal:'Highlight the role of feedback in growth — demonstrates how input influences learning.'},
+    {q:'How do you usually coordinate team and individual goals? What are your strategies to coordinate vested interests?',concept:'Socially Shared Regulated Learning (SSRL)',goal:'Bridge individual learning to team learning — connects personal agendas to collaborative PBL context.'},
+    {q:'What are your expectations for working interdisciplinarily? What strategies do you apply?',concept:'Socially Shared Regulated Learning (SSRL)',goal:'Interdisciplinary collaboration — experiences and strategies.'},
+    {q:'What are your expectations for working, learning and innovating in teams? How do you deal with team learning and communication?',concept:'Socially Shared Regulated Learning (SSRL)',goal:'Collaboration — experiences and strategies; socially shared regulated learning.'},
   ],
-  3: [
-    { q: 'Have you ever worked on a project that required knowledge from multiple disciplines? How did combining perspectives impact your learning?', concept: 'Authentic & Experiential Learning', goal: 'Encourage interdisciplinary thinking — explores how integrating diverse knowledge enhances learning' },
-    { q: 'How do you feel about using a digital portfolio to showcase your learning and projects?', concept: 'Metacognition & Reflection', goal: 'Assess reflection and presentation of learning — examines attitudes toward documenting experiences' },
-    { q: 'PBL involves collaboration with industry and academia. What kinds of real-world projects would you be most excited to work on?', concept: 'Authentic & Experiential Learning', goal: 'Connect learning to real-world applications — identifies interests and motivations' },
-    { q: 'Would you be open to sharing your work in a team and collaborating with a broader learning community? What would make you more willing?', concept: 'Psychological Safety & Belonging', goal: 'Explore openness to knowledge sharing — investigates willingness to engage in broader learning networks' },
-    { q: 'Reflecting on a past project, what was the most valuable lesson — not just academically, but in terms of teamwork, communication, or adaptability?', concept: 'Transversal Skills Development', goal: 'Highlight personal and professional growth — encourages reflection on key skills gained beyond academics' },
-    { q: 'What do you expect from a team PBL coach during a project? How would their support ideally look?', concept: 'Team Regulation & Collaboration Contract', goal: 'Align coaching expectations — surfaces mental models of coaching and prepares for the coach/facilitator role' },
-    { q: 'Think of a time you worked in a team where things didn\'t go as planned. What ground rules or agreements could have helped?', concept: 'Team Regulation & Collaboration Contract', goal: 'Prepare for the Collaboration Contract — connects real experience to the need for explicit team agreements' },
-    { q: 'When working in teams, how do you handle situations where someone is not contributing or there is unconstructive conflict?', concept: 'Team Regulation & Collaboration Contract', goal: 'Explore team regulation and conflict resolution — addresses teamwork dynamics' },
-    { q: 'What tools have you used to manage projects or track team progress (e.g., Gantt charts, Kanban boards)?', concept: 'Project Management Literacy', goal: 'Map prior experience with PM tools — identifies baseline knowledge and prepares for Lucidchart and Gantt tools' },
-    { q: 'Which transversal skills (e.g., teamwork, communication, adaptability, critical thinking) do you find most challenging to develop?', concept: 'Transversal Skills Development', goal: 'Identify transversal skill development priorities — helps coaches focus on specific skills' },
-    { q: 'How do you think regular check-ins or structured meetings with a coach could support your team\'s learning process?', concept: 'Co-Regulation & Peer Learning', goal: 'Introduce coaching process/structure — opens discussion about recurring meeting structure' },
-    { q: 'Have you ever participated in project-based learning or worked on an industry project? What are your experiences and lessons learned?', concept: 'Authentic & Experiential Learning', goal: 'PBL approach — experiences and strategies; active learning in teams' },
+  3:[
+    {q:'Have you ever worked on a project requiring knowledge from multiple disciplines? How did combining perspectives impact your learning?',concept:'Authentic & Experiential Learning',goal:'Encourage interdisciplinary thinking — explores how integrating diverse knowledge enhances learning.'},
+    {q:'How do you feel about using a digital portfolio to showcase your learning and projects?',concept:'Metacognition & Reflection',goal:'Assess reflection and presentation of learning — examines attitudes toward documenting experiences.'},
+    {q:'PBL involves collaboration with industry and academia. What kinds of real-world projects would you be most excited to work on?',concept:'Authentic & Experiential Learning',goal:'Connect learning to real-world applications — identifies interests and motivations.'},
+    {q:'Would you be open to sharing your work and collaborating with a broader learning community? What would make you more willing?',concept:'Psychological Safety & Belonging',goal:'Explore openness to knowledge sharing — investigates willingness to engage in broader learning networks.'},
+    {q:'Reflecting on a past project, what was the most valuable lesson — not just academically, but in terms of teamwork or adaptability?',concept:'Transversal Skills Development',goal:'Highlight personal and professional growth — encourages reflection on key skills gained beyond academics.'},
+    {q:'What do you expect from a team PBL coach during a project? How would their support ideally look?',concept:'Team Regulation & Collaboration Contract',goal:'Align coaching expectations — surfaces mental models of coaching and prepares for the coach/facilitator role.'},
+    {q:'Think of a time you worked in a team where things didn\'t go as planned. What ground rules could have helped?',concept:'Team Regulation & Collaboration Contract',goal:'Prepare for the Collaboration Contract — connects real experience to the need for explicit team agreements.'},
+    {q:'When working in teams, how do you handle situations where someone is not contributing or there is unconstructive conflict?',concept:'Team Regulation & Collaboration Contract',goal:'Explore team regulation and conflict resolution — addresses teamwork dynamics.'},
+    {q:'What tools have you used to manage projects or track team progress (e.g., Gantt charts, Kanban boards)?',concept:'Project Management Literacy',goal:'Map prior experience with PM tools — prepares for Lucidchart and Gantt tools in the course.'},
+    {q:'Which transversal skills (teamwork, communication, adaptability, critical thinking) do you find most challenging to develop?',concept:'Transversal Skills Development',goal:'Identify transversal skill development priorities — helps coaches focus on specific skills.'},
+    {q:'How do you think regular check-ins with a coach could support your team\'s learning process?',concept:'Co-Regulation & Peer Learning',goal:'Introduce coaching process/structure — opens discussion about recurring meeting structure.'},
+    {q:'Have you ever participated in project-based learning or worked on an industry project? What are your lessons learned?',concept:'Authentic & Experiential Learning',goal:'PBL approach — experiences and strategies; active learning in teams.'},
   ]
 };
-
-// ── BOARD LAYOUT (metro-style) ────────────────────────────────────────────
-// Stations per line with SVG positions
-const STATIONS = {
-  1: [
-    { id:'1-1', x:80,  y:480, label:'S1' },
-    { id:'1-2', x:160, y:400, label:'S2' },
-    { id:'1-3', x:160, y:300, label:'S3' },
-    { id:'1-4', x:160, y:200, label:'S4' },
-    { id:'1-5', x:240, y:130, label:'S5' },
-    { id:'1-6', x:340, y:130, label:'S6' },
-    { id:'1-7', x:440, y:130, label:'S7' },
-    { id:'1-8', x:540, y:200, label:'S8' },
-    { id:'1-9', x:540, y:300, label:'END', isEnd: true },
-  ],
-  2: [
-    { id:'2-1', x:80,  y:300, label:'S1' },
-    { id:'2-2', x:160, y:300, label:'S2', isJunction: true },
-    { id:'2-3', x:240, y:300, label:'S3' },
-    { id:'2-4', x:340, y:300, label:'S4' },
-    { id:'2-5', x:440, y:300, label:'S5' },
-    { id:'2-6', x:540, y:300, label:'S6', isJunction: true },
-    { id:'2-7', x:640, y:300, label:'S7' },
-    { id:'2-8', x:720, y:380, label:'S8' },
-    { id:'2-9', x:720, y:460, label:'S9' },
-    { id:'2-10',x:640, y:480, label:'S10'},
-    { id:'2-11',x:540, y:480, label:'END', isEnd: true },
-  ],
-  3: [
-    { id:'3-1', x:80,  y:120, label:'S1' },
-    { id:'3-2', x:160, y:120, label:'S2' },
-    { id:'3-3', x:240, y:120, label:'S3', isJunction: true },
-    { id:'3-4', x:340, y:120, label:'S4' },
-    { id:'3-5', x:440, y:120, label:'S5' },
-    { id:'3-6', x:540, y:120, label:'S6' },
-    { id:'3-7', x:640, y:120, label:'S7' },
-    { id:'3-8', x:720, y:200, label:'S8' },
-    { id:'3-9', x:720, y:300, label:'S9', isJunction: true },
-    { id:'3-10',x:720, y:380, label:'S10', isJunction: true },
-    { id:'3-11',x:640, y:460, label:'S11'},
-    { id:'3-12',x:540, y:480, label:'END', isEnd: true },
-  ]
+const STATIONS={
+  1:[{id:'1-1',x:80,y:460,n:1},{id:'1-2',x:80,y:360,n:2},{id:'1-3',x:80,y:260,n:3},{id:'1-4',x:160,y:180,n:4},{id:'1-5',x:260,y:140,n:5},{id:'1-6',x:360,y:140,n:6},{id:'1-7',x:460,y:140,n:7},{id:'1-8',x:540,y:180,n:8},{id:'1-9',x:580,y:260,n:9,isEnd:true}],
+  2:[{id:'2-1',x:80,y:280,n:1},{id:'2-2',x:160,y:280,n:2},{id:'2-3',x:260,y:280,n:3},{id:'2-4',x:360,y:280,n:4},{id:'2-5',x:460,y:280,n:5},{id:'2-6',x:560,y:280,n:6},{id:'2-7',x:660,y:280,n:7},{id:'2-8',x:740,y:340,n:8},{id:'2-9',x:740,y:420,n:9},{id:'2-10',x:660,y:460,n:10},{id:'2-11',x:560,y:460,n:11,isEnd:true}],
+  3:[{id:'3-1',x:80,y:100,n:1},{id:'3-2',x:180,y:100,n:2},{id:'3-3',x:280,y:100,n:3},{id:'3-4',x:380,y:100,n:4},{id:'3-5',x:480,y:100,n:5},{id:'3-6',x:580,y:100,n:6},{id:'3-7',x:680,y:100,n:7},{id:'3-8',x:760,y:160,n:8},{id:'3-9',x:760,y:260,n:9},{id:'3-10',x:760,y:360,n:10},{id:'3-11',x:680,y:440,n:11},{id:'3-12',x:580,y:460,n:12,isEnd:true}]
 };
 
-// ── STATE ─────────────────────────────────────────────────────────────────
-let teams = [];
-let currentTeamIdx = 0;
-let activeStation = null;
-let activeCard = null;
+// ── STATE ──
+let groupName='', minutesPerLine=15, currentLine=1;
+let completed={1:[],2:[],3:[]};
+let timerInterval=null, secondsLeft=0;
+let activeStationData=null;
 
-const TEAM_COLORS = ['#E74C3C','#3498DB','#9B59B6','#E67E22','#1ABC9C','#F39C12'];
-
-// ── INIT ──────────────────────────────────────────────────────────────────
-function showScreen(name) {
-  document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
-  document.getElementById('screen-' + name).classList.add('active');
-  if (name === 'setup') initSetup();
-  if (name === 'game')  initBoard();
+// ── SCREENS ──
+function showScreen(n){
+  document.querySelectorAll('.screen').forEach(s=>s.classList.remove('active'));
+  document.getElementById('screen-'+n).classList.add('active');
+  if(n==='setup') setTimeout(()=>document.getElementById('group-name-input').focus(),100);
 }
 
-function initSetup() {
-  const c = document.getElementById('teams-container');
-  c.innerHTML = '';
-  addTeamInput('Team Alpha');
-  addTeamInput('Team Beta');
-}
-
-function addTeamInput(defaultVal = '') {
-  const c = document.getElementById('teams-container');
-  const idx = c.children.length;
-  const div = document.createElement('div');
-  div.className = 'team-input-group';
-  div.innerHTML = `
-    <label>Team ${idx + 1}</label>
-    <input type="text" placeholder="Enter team name" value="${defaultVal}">
-  `;
-  c.appendChild(div);
-}
-
-function startGame() {
-  const inputs = document.querySelectorAll('#teams-container input');
-  teams = [];
-  inputs.forEach((inp, i) => {
-    const name = inp.value.trim() || `Team ${i+1}`;
-    teams.push({
-      name,
-      color: TEAM_COLORS[i % TEAM_COLORS.length],
-      positions: { 1: 0, 2: 0, 3: 0 },
-      completed: { 1: [], 2: [], 3: [] },
-      usedCards: { 1: [], 2: [], 3: [] },
-      totalAnswered: 0,
-      chosenLine: null
-    });
-  });
-  currentTeamIdx = 0;
+function startGame(){
+  groupName=document.getElementById('group-name-input').value.trim()||'Team 1';
+  minutesPerLine=parseInt(document.getElementById('timer-input').value)||15;
+  currentLine=1; completed={1:[],2:[],3:[]};
   showScreen('game');
+  document.getElementById('sb-group-name').textContent=groupName;
+  document.getElementById('end-group-name').textContent=groupName;
+  updateSidebar(); startTimer(); renderBoard(); updateTopbar();
 }
 
-// ── BOARD RENDERING ───────────────────────────────────────────────────────
-function initBoard() {
-  renderSidebar();
-  renderBoard();
-  updateTurnDisplay();
+// ── TIMER ──
+function startTimer(){
+  clearInterval(timerInterval);
+  secondsLeft=minutesPerLine*60;
+  renderTimer();
+  timerInterval=setInterval(()=>{
+    secondsLeft--;
+    renderTimer();
+    if(secondsLeft<=0){
+      clearInterval(timerInterval);
+      showTimeUp();
+    }
+  },1000);
 }
 
-function renderSidebar() {
-  const list = document.getElementById('teams-list');
-  list.innerHTML = '';
-  teams.forEach((team, i) => {
-    const div = document.createElement('div');
-    div.className = 'team-chip' + (i === currentTeamIdx ? ' active' : '');
-    div.id = `team-chip-${i}`;
-    const total = Object.values(team.completed).reduce((a, b) => a + b.length, 0);
-    const max = Object.values(CARDS).reduce((a, b) => a + b.length, 0);
-    div.innerHTML = `
-      <div class="team-dot" style="background:${team.color}"></div>
-      <div class="team-chip-name">${team.name}</div>
-      <div class="team-chip-pos">${total}/${max}</div>
-    `;
-    list.appendChild(div);
+function renderTimer(){
+  const m=Math.floor(secondsLeft/60), s=secondsLeft%60;
+  const el=document.getElementById('sb-timer-val');
+  el.textContent=`${String(m).padStart(2,'0')}:${String(s).padStart(2,'0')}`;
+  el.className='sb-timer-val';
+  if(secondsLeft<=60) el.classList.add('danger');
+  else if(secondsLeft<=180) el.classList.add('warn');
+  document.getElementById('sb-timer-sub').textContent=LINE_META[currentLine].label;
+}
+
+// ── TIME UP ──
+function showTimeUp(){
+  const next=currentLine+1;
+  const title=document.getElementById('timeup-title');
+  const sub=document.getElementById('timeup-sub');
+  const badge=document.getElementById('timeup-badge');
+  const nextBtn=document.getElementById('btn-timeup-next');
+
+  title.textContent=`Time's up on ${LINE_META[currentLine].label}!`;
+
+  if(currentLine<3){
+    sub.textContent=`You've completed ${completed[currentLine].length} station${completed[currentLine].length!==1?'s':''} on ${LINE_META[currentLine].label}.\nMove on to ${LINE_META[next].label} or stay to finish more.`;
+    badge.style.background=LINE_META[next].color;
+    badge.textContent=`Next: ${LINE_META[next].label} · ${LINE_META[next].name}`;
+    nextBtn.style.display='inline-block';
+  } else {
+    sub.textContent=`You've reached the end of the journey!`;
+    badge.style.background=LINE_META[3].color;
+    badge.textContent=`${LINE_META[3].label} · ${LINE_META[3].name}`;
+    nextBtn.style.display='none';
+  }
+  document.getElementById('timeup-overlay').classList.add('open');
+}
+
+function closeTimeUp(){
+  document.getElementById('timeup-overlay').classList.remove('open');
+  // restart timer for remaining time on same line (give 5 more minutes)
+  secondsLeft=5*60;
+  timerInterval=setInterval(()=>{secondsLeft--;renderTimer();if(secondsLeft<=0){clearInterval(timerInterval);showTimeUp();}},1000);
+  renderTimer();
+  showToast('5 more minutes added!');
+}
+
+function advanceLineFromTimeUp(){
+  document.getElementById('timeup-overlay').classList.remove('open');
+  if(currentLine<3){
+    currentLine++;
+    startTimer();
+    updateSidebar();
+    updateTopbar();
+    renderBoard();
+    showToast(`Now on ${LINE_META[currentLine].label}!`);
+  } else {
+    clearInterval(timerInterval);
+    showScreen('end');
+  }
+}
+
+// ── SIDEBAR ──
+function updateSidebar(){
+  [1,2,3].forEach(l=>{
+    const total=CARDS[l].length, done=completed[l].length, pct=total>0?(done/total*100):0;
+    document.getElementById(`lp-bar-${l}`).style.width=pct+'%';
+    document.getElementById(`lp-count-${l}`).textContent=`${done} / ${total}`;
+    document.getElementById(`lp-lock-${l}`).textContent=l===currentLine?'▶':'';
+    const item=document.getElementById(`lp-${l}`);
+    item.classList.toggle('active-line',l===currentLine);
   });
 }
 
-function renderBoard() {
-  const svg = document.getElementById('board-svg');
-  svg.innerHTML = '';
+function updateTopbar(){
+  const meta=LINE_META[currentLine];
+  const badge=document.getElementById('topbar-badge');
+  badge.style.background=meta.color;
+  badge.textContent=`${meta.label} · ${meta.name}`;
+  const done=completed[currentLine].length, total=CARDS[currentLine].length;
+  document.getElementById('topbar-hint').textContent=`${total-done} station${total-done!==1?'s':''} remaining`;
+}
 
-  const defs = document.createElementNS('http://www.w3.org/2000/svg','defs');
-  // subtle grid background
-  defs.innerHTML = `
-    <pattern id="grid" width="40" height="40" patternUnits="userSpaceOnUse">
-      <path d="M 40 0 L 0 0 0 40" fill="none" stroke="rgba(0,0,0,0.04)" stroke-width="1"/>
-    </pattern>
-    <filter id="glow">
-      <feGaussianBlur stdDeviation="3" result="blur"/>
-      <feMerge><feMergeNode in="blur"/><feMergeNode in="SourceGraphic"/></feMerge>
-    </filter>
-  `;
-  svg.appendChild(defs);
+// ── BOARD ──
+function renderBoard(){
+  const svg=document.getElementById('board-svg');
+  svg.innerHTML=`<defs><pattern id="dots" width="28" height="28" patternUnits="userSpaceOnUse"><circle cx="14" cy="14" r="1" fill="rgba(0,0,0,0.07)"/></pattern></defs><rect width="820" height="560" fill="url(#dots)"/>`;
 
-  // Background
-  const bg = document.createElementNS('http://www.w3.org/2000/svg','rect');
-  bg.setAttribute('width','800'); bg.setAttribute('height','600');
-  bg.setAttribute('fill','url(#grid)');
-  svg.appendChild(bg);
+  [1,2,3].forEach(line=>{
+    const stns=STATIONS[line], meta=LINE_META[line];
+    const isActive=line===currentLine;
 
-  // Title
-  const title = document.createElementNS('http://www.w3.org/2000/svg','text');
-  title.setAttribute('x','400'); title.setAttribute('y','555');
-  title.setAttribute('text-anchor','middle');
-  title.setAttribute('font-family','Syne, sans-serif');
-  title.setAttribute('font-size','11');
-  title.setAttribute('font-weight','700');
-  title.setAttribute('letter-spacing','4');
-  title.setAttribute('fill','rgba(0,0,0,0.15)');
-  title.textContent = 'PBL GAME · START YOUR JOURNEY';
-  svg.appendChild(title);
-
-  // Draw each line's track
-  [1, 2, 3].forEach(line => {
-    const stns = STATIONS[line];
-    const color = LINES[line].color;
-
-    // Track path
-    const pts = stns.map(s => `${s.x},${s.y}`).join(' ');
-    const path = document.createElementNS('http://www.w3.org/2000/svg','polyline');
-    path.setAttribute('points', pts);
-    path.setAttribute('fill','none');
-    path.setAttribute('stroke', color);
-    path.setAttribute('stroke-width','4');
-    path.setAttribute('stroke-linecap','round');
+    // Track line
+    const path=document.createElementNS('http://www.w3.org/2000/svg','polyline');
+    path.setAttribute('points',stns.map(s=>`${s.x},${s.y}`).join(' '));
+    path.setAttribute('fill','none'); path.setAttribute('stroke',meta.color);
+    path.setAttribute('stroke-width','4'); path.setAttribute('stroke-linecap','round');
     path.setAttribute('stroke-linejoin','round');
-    path.setAttribute('opacity','0.7');
+    path.setAttribute('opacity',isActive?'0.8':'0.35');
     svg.appendChild(path);
-  });
 
-  // Draw stations
-  [1, 2, 3].forEach(line => {
-    const stns = STATIONS[line];
-    const color = LINES[line].color;
-    const cards = CARDS[line];
+    // Line label
+    const lbl=document.createElementNS('http://www.w3.org/2000/svg','text');
+    lbl.setAttribute('x',stns[0].x-38); lbl.setAttribute('y',stns[0].y+4);
+    lbl.setAttribute('text-anchor','middle'); lbl.setAttribute('font-family','Space Mono, monospace');
+    lbl.setAttribute('font-size','9'); lbl.setAttribute('font-weight','700');
+    lbl.setAttribute('letter-spacing','1'); lbl.setAttribute('fill',meta.color);
+    lbl.setAttribute('opacity',isActive?'1':'0.45');
+    lbl.textContent=`L${line}`;
+    svg.appendChild(lbl);
 
-    stns.forEach((stn, idx) => {
-      const cardIdx = idx; // each station maps to a card
-      const card = cards[cardIdx] || cards[cards.length - 1];
+    // Stations
+    stns.forEach((stn,idx)=>{
+      const card=CARDS[line][idx];
+      const isDone=completed[line].includes(stn.id);
+      // ALL stations on ALL lines are clickable — no locking
+      const clickable=!isDone;
 
-      // Check if any team has completed this station
-      const completedByAny = teams.some(t => t.completed[line].includes(stn.id));
-      const completedByCurrent = teams[currentTeamIdx]?.completed[line].includes(stn.id);
+      const g=document.createElementNS('http://www.w3.org/2000/svg','g');
+      g.setAttribute('opacity',isActive?'1':'0.45');
+      if(clickable){ g.setAttribute('cursor','pointer'); }
 
-      // Station group
-      const g = document.createElementNS('http://www.w3.org/2000/svg','g');
-      g.setAttribute('cursor', completedByCurrent ? 'default' : 'pointer');
-      if (!completedByCurrent) {
-        g.addEventListener('click', () => openCard(line, stn, card));
+      if(clickable){
+        const pulse=document.createElementNS('http://www.w3.org/2000/svg','circle');
+        pulse.setAttribute('cx',stn.x); pulse.setAttribute('cy',stn.y);
+        pulse.setAttribute('r','20'); pulse.setAttribute('fill',meta.color);
+        pulse.setAttribute('opacity','0');
+        g.addEventListener('mouseenter',()=>pulse.setAttribute('opacity','0.13'));
+        g.addEventListener('mouseleave',()=>pulse.setAttribute('opacity','0'));
+        g.appendChild(pulse);
+        g.addEventListener('click',()=>openCard(line,stn,card,idx));
       }
 
-      // Outer ring
-      const outer = document.createElementNS('http://www.w3.org/2000/svg','circle');
-      outer.setAttribute('cx', stn.x); outer.setAttribute('cy', stn.y);
-      outer.setAttribute('r', stn.isEnd ? '14' : '10');
-      outer.setAttribute('fill', completedByCurrent ? color : 'white');
-      outer.setAttribute('stroke', color);
-      outer.setAttribute('stroke-width', stn.isEnd ? '3' : '2.5');
-      outer.setAttribute('opacity', completedByCurrent ? '1' : '0.9');
+      const r=stn.isEnd?14:10;
+      const outer=document.createElementNS('http://www.w3.org/2000/svg','circle');
+      outer.setAttribute('cx',stn.x); outer.setAttribute('cy',stn.y); outer.setAttribute('r',r);
+      outer.setAttribute('fill',isDone?meta.color:'white');
+      outer.setAttribute('stroke',meta.color); outer.setAttribute('stroke-width',stn.isEnd?'3':'2.5');
       g.appendChild(outer);
 
-      // Inner dot
-      if (!completedByCurrent) {
-        const inner = document.createElementNS('http://www.w3.org/2000/svg','circle');
-        inner.setAttribute('cx', stn.x); inner.setAttribute('cy', stn.y);
-        inner.setAttribute('r', '4');
-        inner.setAttribute('fill', color);
-        g.appendChild(inner);
+      if(isDone){
+        const t=document.createElementNS('http://www.w3.org/2000/svg','text');
+        t.setAttribute('x',stn.x); t.setAttribute('y',stn.y+5); t.setAttribute('text-anchor','middle');
+        t.setAttribute('font-size',stn.isEnd?'13':'11'); t.setAttribute('fill','white'); t.textContent='✓';
+        g.appendChild(t);
       } else {
-        // Checkmark
-        const check = document.createElementNS('http://www.w3.org/2000/svg','text');
-        check.setAttribute('x', stn.x); check.setAttribute('y', stn.y + 5);
-        check.setAttribute('text-anchor','middle');
-        check.setAttribute('font-size','12');
-        check.setAttribute('fill','white');
-        check.textContent = '✓';
-        g.appendChild(check);
+        const inner=document.createElementNS('http://www.w3.org/2000/svg','circle');
+        inner.setAttribute('cx',stn.x); inner.setAttribute('cy',stn.y); inner.setAttribute('r','4');
+        inner.setAttribute('fill',meta.color);
+        g.appendChild(inner);
       }
 
-      // Team markers (small dots above station showing which teams visited)
-      const visitingTeams = teams.filter(t => t.completed[line].includes(stn.id));
-      visitingTeams.forEach((t, ti) => {
-        const dot = document.createElementNS('http://www.w3.org/2000/svg','circle');
-        dot.setAttribute('cx', stn.x - 8 + ti * 9);
-        dot.setAttribute('cy', stn.y - 18);
-        dot.setAttribute('r', '4');
-        dot.setAttribute('fill', t.color);
-        dot.setAttribute('stroke','white');
-        dot.setAttribute('stroke-width','1.5');
-        g.appendChild(dot);
-      });
-
-      // END label
-      if (stn.isEnd) {
-        const endLabel = document.createElementNS('http://www.w3.org/2000/svg','text');
-        endLabel.setAttribute('x', stn.x + 20); endLabel.setAttribute('y', stn.y + 4);
-        endLabel.setAttribute('font-family','Space Mono, monospace');
-        endLabel.setAttribute('font-size','9');
-        endLabel.setAttribute('font-weight','700');
-        endLabel.setAttribute('letter-spacing','2');
-        endLabel.setAttribute('fill', color);
-        endLabel.textContent = 'END';
-        g.appendChild(endLabel);
+      if(stn.isEnd){
+        const el=document.createElementNS('http://www.w3.org/2000/svg','text');
+        el.setAttribute('x',stn.x+20); el.setAttribute('y',stn.y+5);
+        el.setAttribute('font-family','Space Mono, monospace'); el.setAttribute('font-size','9');
+        el.setAttribute('font-weight','700'); el.setAttribute('letter-spacing','2');
+        el.setAttribute('fill',meta.color); el.textContent='END';
+        g.appendChild(el);
+      } else {
+        const nl=document.createElementNS('http://www.w3.org/2000/svg','text');
+        nl.setAttribute('x',stn.x); nl.setAttribute('y',stn.y+r+13);
+        nl.setAttribute('text-anchor','middle'); nl.setAttribute('font-family','Space Mono, monospace');
+        nl.setAttribute('font-size','8'); nl.setAttribute('fill',meta.color);
+        nl.setAttribute('opacity','0.65'); nl.textContent=`S${stn.n}`;
+        g.appendChild(nl);
       }
-
-      // Hover pulse (only for uncompleted)
-      if (!completedByCurrent) {
-        const pulse = document.createElementNS('http://www.w3.org/2000/svg','circle');
-        pulse.setAttribute('cx', stn.x); pulse.setAttribute('cy', stn.y);
-        pulse.setAttribute('r', '16');
-        pulse.setAttribute('fill', color);
-        pulse.setAttribute('opacity','0');
-        pulse.setAttribute('class','station-pulse');
-        g.setAttribute('data-pulse', '');
-        g.addEventListener('mouseenter', () => { pulse.setAttribute('opacity','0.15'); });
-        g.addEventListener('mouseleave', () => { pulse.setAttribute('opacity','0'); });
-        g.insertBefore(pulse, g.firstChild);
-      }
-
       svg.appendChild(g);
     });
   });
 
-  // LINE labels on the left
-  [1,2,3].forEach(line => {
-    const firstStn = STATIONS[line][0];
-    const color = LINES[line].color;
-    const label = document.createElementNS('http://www.w3.org/2000/svg','text');
-    label.setAttribute('x', firstStn.x - 40);
-    label.setAttribute('y', firstStn.y + 4);
-    label.setAttribute('text-anchor','middle');
-    label.setAttribute('font-family','Space Mono, monospace');
-    label.setAttribute('font-size','9');
-    label.setAttribute('font-weight','700');
-    label.setAttribute('letter-spacing','1');
-    label.setAttribute('fill', color);
-    label.textContent = `L${line}`;
-    svg.appendChild(label);
-  });
+  const wm=document.createElementNS('http://www.w3.org/2000/svg','text');
+  wm.setAttribute('x','410'); wm.setAttribute('y','545'); wm.setAttribute('text-anchor','middle');
+  wm.setAttribute('font-family','Syne, sans-serif'); wm.setAttribute('font-size','9');
+  wm.setAttribute('font-weight','700'); wm.setAttribute('letter-spacing','4');
+  wm.setAttribute('fill','rgba(0,0,0,.1)'); wm.textContent='PBL GAME · START YOUR JOURNEY · IT:U';
+  svg.appendChild(wm);
 }
 
-// ── CARD LOGIC ────────────────────────────────────────────────────────────
-function openCard(line, station, card) {
-  activeStation = { line, station };
-  activeCard = card;
-
-  const color = LINES[line].color;
-
-  document.getElementById('modal-line-tag').textContent = LINES[line].label;
-  document.getElementById('modal-line-tag').style.background = color;
-  document.getElementById('modal-station-label').textContent = `Station ${station.label}`;
-  document.getElementById('modal-question').textContent = card.q;
-  document.getElementById('modal-concept').textContent = card.concept;
-  document.getElementById('modal-concept').style.background = color + '18';
-  document.getElementById('modal-concept').style.color = color;
-  document.getElementById('modal-goal').textContent = card.goal;
-  document.getElementById('modal-done-btn').style.background = color;
-
-  document.getElementById('card-modal').classList.add('open');
+// ── CARD ──
+function openCard(line,stn,card,idx){
+  activeStationData={line,stn,card};
+  const meta=LINE_META[line];
+  document.getElementById('modal-inner').innerHTML=`
+    <div class="mc-top">
+      <div class="mc-tag" style="background:${meta.color}">${meta.label} · Station ${stn.n}</div>
+      <div class="mc-station">Card ${idx+1} of ${CARDS[line].length}</div>
+    </div>
+    <div class="mc-body">
+      <div class="mc-q">${card.q}</div>
+      <div class="mc-sep"></div>
+      <div class="mc-pill-label">Key Concept</div>
+      <div class="mc-concept" style="background:${meta.color}1A;color:${meta.color}">${card.concept}</div>
+      <div class="mc-pill-label" style="margin-top:12px">Goal</div>
+      <div class="mc-goal">${card.goal}</div>
+      <div class="mc-notepad">
+        <div class="mc-notepad-lbl">📝 Notes (write on your notepad)</div>
+        <textarea placeholder="Take notes while your group discusses…"></textarea>
+      </div>
+      <div class="mc-actions">
+        <button class="btn-skip" onclick="closeCard()">Back</button>
+        <button class="btn-ans" style="background:${meta.color}" onclick="completeStation()">Everyone answered ✓</button>
+      </div>
+    </div>`;
+  document.getElementById('card-overlay').classList.add('open');
 }
 
-function closeCard() {
-  document.getElementById('card-modal').classList.remove('open');
-  activeStation = null;
-  activeCard = null;
+function closeCard(){
+  document.getElementById('card-overlay').classList.remove('open');
+  activeStationData=null;
 }
 
-function completeStation() {
-  if (!activeStation) return;
-  const { line, station } = activeStation;
-  const team = teams[currentTeamIdx];
-
-  if (!team.completed[line].includes(station.id)) {
-    team.completed[line].push(station.id);
-    team.totalAnswered++;
-  }
-
+function completeStation(){
+  if(!activeStationData) return;
+  const{line,stn}=activeStationData;
+  if(!completed[line].includes(stn.id)) completed[line].push(stn.id);
   closeCard();
-  renderBoard();
-  renderSidebar();
-  showToast(`✓ ${team.name} answered a card!`);
+  updateSidebar(); updateTopbar(); renderBoard();
 
-  // Check win condition (all stations on at least one line completed)
-  const allStationsCount = Object.values(STATIONS).reduce((a,b) => a + b.length, 0);
-  const teamTotal = Object.values(team.completed).reduce((a,b) => a + b.length, 0);
-  if (teamTotal >= allStationsCount) {
-    setTimeout(() => {
-      document.getElementById('winner-name').textContent = team.name;
-      document.getElementById('winner-name').style.color = team.color;
-      showScreen('winner');
-    }, 800);
+  // Check full game completion
+  const allDone=[1,2,3].every(l=>completed[l].length===CARDS[l].length);
+  if(allDone){ clearInterval(timerInterval); setTimeout(()=>showScreen('end'),600); return; }
+
+  // If current line just got fully completed, show line-complete message
+  if(completed[line].length===CARDS[line].length && line<3){
+    showLineComplete(line);
+    return;
   }
+
+  showToast('✓ Station complete! Move your pawn forward.');
 }
 
-function nextTurn() {
-  currentTeamIdx = (currentTeamIdx + 1) % teams.length;
-  updateTurnDisplay();
-  renderSidebar();
-  renderBoard();
-  showToast(`Now it's ${teams[currentTeamIdx].name}'s turn`);
+function showLineComplete(line){
+  const meta=LINE_META[line];
+  const nextMeta=LINE_META[line+1];
+  document.getElementById('modal-inner').innerHTML=`
+    <div class="mc-body" style="padding:36px 28px;text-align:center;">
+      <div style="font-size:52px;margin-bottom:16px;">🎯</div>
+      <div style="font-size:22px;font-weight:800;margin-bottom:8px;">${meta.label} Complete!</div>
+      <div style="font-family:'Space Mono',monospace;font-size:11px;color:rgba(0,0,0,.4);letter-spacing:2px;margin-bottom:20px;">Well done — great conversations!</div>
+      <div style="background:${meta.color}12;border:1.5px solid ${meta.color}30;border-radius:12px;padding:14px 18px;margin-bottom:24px;font-size:13px;line-height:1.7;color:rgba(0,0,0,.6);">
+        You have answered all questions on <strong>${meta.label}</strong>.<br>
+        When ready, move your pawn to <strong style="color:${nextMeta.color}">${nextMeta.label} — ${nextMeta.name}</strong>.
+      </div>
+      <button class="btn-ans" style="background:${nextMeta.color};width:100%;" onclick="closeCard();advanceLine();">
+        Go to ${nextMeta.label} →
+      </button>
+    </div>`;
+  document.getElementById('card-overlay').classList.add('open');
 }
 
-function updateTurnDisplay() {
-  const team = teams[currentTeamIdx];
-  if (!team) return;
-  document.getElementById('turn-name').textContent = team.name;
-  document.getElementById('turn-dot').style.background = team.color;
+function advanceLine(){
+  if(currentLine>=3) return;
+  const lineFull = completed[currentLine].length === CARDS[currentLine].length;
+  currentLine++;
+  // Only reset timer if the previous line was fully completed
+  if(lineFull){ startTimer(); }
+  updateSidebar(); updateTopbar(); renderBoard();
+  if(!lineFull){ showToast(`Switched to ${LINE_META[currentLine].label} — timer continues`); }
 }
 
-function showToast(msg) {
-  const t = document.getElementById('toast');
-  t.textContent = msg;
-  t.classList.add('show');
-  setTimeout(() => t.classList.remove('show'), 2500);
+function showToast(msg){
+  const t=document.getElementById('toast');
+  t.textContent=msg; t.classList.add('show');
+  setTimeout(()=>t.classList.remove('show'),2800);
 }
 
-// ── BOOT ──────────────────────────────────────────────────────────────────
-document.addEventListener('DOMContentLoaded', () => {
-  showScreen('intro');
-});
+document.addEventListener('DOMContentLoaded',()=>showScreen('intro'));
 </script>
 </body>
 </html>
